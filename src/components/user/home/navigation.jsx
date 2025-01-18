@@ -8,23 +8,46 @@ export default function NavigationBar() {
     navigate("/login");
   };
 
+  const handleLogoClick = () => {
+    navigate("/");
+  };
+
+  const handleProductsClick = () => {
+    navigate("/product");
+  };
+
+  const handleCategoriesClick = () => {
+    navigate("/category"); // Update the route for Categories
+  };
+
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <span className="text-2xl font-bold text-green-600">AgroNepal</span>
+            <button
+              onClick={handleLogoClick}
+              className="text-2xl font-bold text-green-600 hover:text-green-700 focus:outline-none"
+            >
+              AgroNepal
+            </button>
           </div>
 
           {/* Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <a href="#" className="text-gray-700 hover:text-green-600">
+            <button
+              onClick={handleProductsClick}
+              className="text-gray-700 hover:text-green-600 focus:outline-none"
+            >
               Products
-            </a>
-            <a href="#" className="text-gray-700 hover:text-green-600">
+            </button>
+            <button
+              onClick={handleCategoriesClick} // On click, navigate to /category
+              className="text-gray-700 hover:text-green-600 focus:outline-none"
+            >
               Categories
-            </a>
+            </button>
             <a href="#" className="text-gray-700 hover:text-green-600">
               Vendors
             </a>

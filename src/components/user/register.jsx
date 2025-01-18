@@ -1,4 +1,3 @@
-
 const Register = () => {
   const handleRegister = (e) => {
     e.preventDefault();
@@ -8,7 +7,9 @@ const Register = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Register</h2>
+        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+          Register
+        </h2>
         <form onSubmit={handleRegister} className="space-y-4">
           {/* Name Field */}
           <div>
@@ -29,7 +30,7 @@ const Register = () => {
             <label htmlFor="email" className="block text-gray-700 font-medium">
               Email
             </label>
-            <input
+            <input  
               type="email"
               id="email"
               placeholder="Enter your email"
@@ -38,15 +39,50 @@ const Register = () => {
             />
           </div>
 
+          {/* Phone Number Field */}
+          <div>
+            <label htmlFor="phone" className="block text-gray-700 font-medium">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              placeholder="Enter your phone number"
+              required
+              pattern="[0-9]{10}" // Adjust pattern to match your validation rules
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
           {/* Password Field */}
           <div>
-            <label htmlFor="password" className="block text-gray-700 font-medium">
+            <label
+              htmlFor="password"
+              className="block text-gray-700 font-medium"
+            >
               Password
             </label>
             <input
               type="password"
               id="password"
               placeholder="Enter your password"
+              required
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          {/* Confirm Password Field */}
+          <div>
+            <label
+              htmlFor="confirm-password"
+              className="block text-gray-700 font-medium"
+            >
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirm-password"
+              placeholder="Re-enter your password"
               required
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
@@ -66,4 +102,3 @@ const Register = () => {
 };
 
 export default Register;
-

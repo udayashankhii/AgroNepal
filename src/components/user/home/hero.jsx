@@ -13,12 +13,8 @@ const Hero = () => {
           directly from local farmers to your doorstep, supporting sustainable
           farming and empowering local communities.
         </p>
-        <a
-          href="/products"
-          className="mt-6 inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition duration-300"
-        >
-          Explore Products →
-        </a>
+        
+        
       </div>
 
       {/* Image Section */}
