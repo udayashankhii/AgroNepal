@@ -1,65 +1,84 @@
+import { useState } from "react";
+
 const Login = () => {
-  const handleLogin = (e) => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Login submitted!");
+    console.log("Login data submitted:", formData);
+    // Add backend integration here
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           Login
         </h2>
-        <form onSubmit={handleLogin} className="space-y-4">
-          {/* Email Field */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email Input */}
           <div>
-            <label htmlFor="email" className="block text-gray-700 font-medium">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <input
               type="email"
               id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               placeholder="Enter your email"
               required
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
-          {/* Password Field */}
+          {/* Password Input */}
           <div>
             <label
               htmlFor="password"
-              className="block text-gray-700 font-medium"
+              className="block text-sm font-medium text-gray-700"
             >
               Password
             </label>
             <input
               type="password"
               id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
               placeholder="Enter your password"
               required
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300"
           >
             Login
           </button>
-
-          {/* Link to Register */}
-          <div className="text-center mt-4">
-            <a
-              href="/register"
-              className="text-blue-500 hover:underline text-sm"
-            >
-              Do not have an account? Register
-            </a>
-          </div>
         </form>
+
+        {/* Link to Register */}
+        <div className="text-center mt-4">
+          <a href="/register" className="text-blue-500 hover:underline text-sm">
+            Don’t have an account? Register
+          </a>
+        </div>
       </div>
     </div>
   );
