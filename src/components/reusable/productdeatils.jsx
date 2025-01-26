@@ -2,12 +2,14 @@ import { useParams } from "react-router-dom";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useCart } from "../hooks/useCart";
+import { useNavigate } from "react-router-dom"; // Added for navigation
 
 function ProductDetails() {
   const { id } = useParams(); // Get the product ID from the URL
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const [product, setProduct] = useState(null);
+  const navigate = useNavigate(); // Hook for navigation
 
   useEffect(() => {
     // Fetch product data based on the ID
@@ -31,6 +33,18 @@ function ProductDetails() {
       quantity,
       image: product.image,
     });
+  };
+
+  // Handle the "Buy Now" action (redirecting to checkout)
+  const handleBuyNow = () => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity,
+      image: product.image,
+    });
+    navigate("/checkout"); // Redirect to checkout page (update with your route)
   };
 
   return (
@@ -63,7 +77,7 @@ function ProductDetails() {
             </ul>
           </div>
 
-          {/* Quantity Selector and Add to Cart */}
+          {/* Quantity Selector and Add to Cart / Buy Now */}
           <div className="flex items-center space-x-4 mb-6">
             <div className="flex items-center border rounded-lg">
               <button
@@ -77,6 +91,8 @@ function ProductDetails() {
                 <Plus className="h-5 w-5" />
               </button>
             </div>
+
+            {/* Add to Cart Button */}
             <button
               onClick={handleAddToCart}
               className="flex-1 flex items-center justify-center space-x-2 bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
@@ -84,10 +100,20 @@ function ProductDetails() {
               <ShoppingCart className="h-5 w-5" />
               <span>Add to Cart</span>
             </button>
+
+            {/* Buy Now Button */}
+            {/* Buy Now Button */}
+            <button
+              onClick={handleBuyNow}
+              className="flex-1 flex items-center justify-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-500 transition-colors"
+            >
+              <span>Buy Now</span>
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
 export default ProductDetails;

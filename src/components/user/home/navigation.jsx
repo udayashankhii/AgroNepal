@@ -17,7 +17,11 @@ export default function NavigationBar() {
   };
 
   const handleCategoriesClick = () => {
-    navigate("/category"); // Update the route for Categories
+    navigate("/category");
+  };
+
+  const handleAboutClick = () => {
+    navigate("/about"); // Redirects to the About page
   };
 
   return (
@@ -43,17 +47,17 @@ export default function NavigationBar() {
               Products
             </button>
             <button
-              onClick={handleCategoriesClick} // On click, navigate to /category
+              onClick={handleCategoriesClick}
               className="text-gray-700 hover:text-green-600 focus:outline-none"
             >
               Categories
             </button>
-            <a href="#" className="text-gray-700 hover:text-green-600">
-              Vendors
-            </a>
-            <a href="#" className="text-gray-700 hover:text-green-600">
+            <button
+              onClick={handleAboutClick}
+              className="text-gray-700 hover:text-green-600 focus:outline-none"
+            >
               About
-            </a>
+            </button>
           </nav>
 
           {/* Icons & Login */}

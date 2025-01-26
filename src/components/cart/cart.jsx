@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Minus, Plus, Trash2 } from "lucide-react";
-import useCart from "../pages/useCarts"; // Updated import statement
+import useCart from "./useCarts"; // Updated import statement
 
 function Cart() {
   const { cart, removeItem, addItem } = useCart(); // Removed itemCount

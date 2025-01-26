@@ -1,6 +1,13 @@
 import FarmImg from "/farmingg.jpg";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate(); // Hook for navigation
+
+  const handleExploreProducts = () => {
+    navigate("/product"); // Redirect to the products page
+  };
+
   return (
     <section className="flex flex-col md:flex-row items-center justify-between px-6 md:px-16 py-10 bg-green-50">
       {/* Content Section */}
@@ -13,8 +20,14 @@ const Hero = () => {
           directly from local farmers to your doorstep, supporting sustainable
           farming and empowering local communities.
         </p>
-        
-        
+
+        {/* Explore Products Button */}
+        <button
+          onClick={handleExploreProducts}
+          className="mt-6 px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-500 transition-colors"
+        >
+          Explore Products
+        </button>
       </div>
 
       {/* Image Section */}

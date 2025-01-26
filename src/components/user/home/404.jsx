@@ -10,7 +10,7 @@ const PageNotFound = () => {
       </p>
 
       {/* Fun Message */}
-      <p className="mt-2 text-lg md:text-xl text-center opacity-80">
+      <p className="mt-2 text-lg md:text-xl text-center opacity-1000">
         It might have been moved, deleted, or eaten by a goat. 🐐
       </p>
 

@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { SlidersHorizontal } from "lucide-react";
 
 function Product() {
   const [searchParams] = useSearchParams();
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const category = searchParams.get("category");
 
@@ -17,51 +15,9 @@ function Product() {
             ? `${category.charAt(0).toUpperCase() + category.slice(1)}`
             : "All Products"}
         </h1>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="lg:hidden flex items-center space-x-2 text-gray-600"
-        >
-          <SlidersHorizontal className="h-5 w-5" />
-          <span>Filters</span>
-        </button>
       </div>
 
       <div className="flex gap-8">
-        {/* Filters */}
-        <div
-          className={`${
-            showFilters ? "block" : "hidden"
-          } lg:block w-64 shrink-0`}
-        >
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Categories</h3>
-              <div className="space-y-2">
-                {categories.map((cat) => (
-                  <label key={cat.id} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-300"
-                    />
-                    <span>{cat.name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Price Range</h3>
-              <div className="space-y-2">
-                <input type="range" min="0" max="5000" className="w-full" />
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>NPR 0</span>
-                  <span>NPR 5,000</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Product Grid or Product Details */}
         <div className="flex-1">
           {selectedProduct ? (
@@ -88,8 +44,7 @@ function Product() {
                     NPR {selectedProduct.price}
                   </p>
                   <p className="text-gray-600">
-                    This is a detailed description of the product. Add more
-                    details as required.
+                    This is a cabbage
                   </p>
                 </div>
               </div>
@@ -123,12 +78,6 @@ function Product() {
   );
 }
 
-const categories = [
-  { id: "cabbage", name: "Cabbage" },
-  { id: "honey", name: "Honey" },
-  { id: "tea", name: "Tea" },
-];
-
 const products = [
   {
     id: "1",
@@ -152,4 +101,5 @@ const products = [
     category: "Honey",
   },
 ];
+
 export default Product;

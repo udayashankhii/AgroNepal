@@ -23,17 +23,17 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="#" className="text-sm hover:underline">
+              <a href="About" className="text-sm hover:underline">
                 About Us
               </a>
             </li>
             <li>
-              <a href="#" className="text-sm hover:underline">
+              <a href="Product" className="text-sm hover:underline">
                 Products
               </a>
             </li>
             <li>
-              <a href="#" className="text-sm hover:underline">
+              <a href="contact" className="text-sm hover:underline">
                 Contact
               </a>
             </li>
