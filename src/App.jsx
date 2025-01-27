@@ -13,10 +13,10 @@ import Category from "./components/cart/category";
 import AboutSection from "./components/user/home/about";
 import ContactUs from "./components/pages/contactus";
 import VendorDashboard from "./components/vendor/vendor.dashboard";
+import AddProductPage from "./components/vendor/add.product";
 const App = () => {
   return (
     <Router>
-      <NavigationBar /> 
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/" element={<NavigationBar />} />
@@ -28,8 +28,9 @@ const App = () => {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/category" element={<Category />} />
         <Route path="/about" element={<AboutSection />} />
-        <Route path="/ConctactUs" element={<ContactUs />} />
-        <Route path="/vendordashboard" element={<VendorDashboard />} />
+        <Route path="/contactUs" element={<ContactUs />} />
+        <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+        <Route path="/product/add" element={<AddProductPage />} />
       </Routes>
       <Footer />
     </Router>

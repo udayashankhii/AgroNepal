@@ -1,23 +1,71 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
-    phone: "",
+    phone_number: "",
     password: "",
-    confirmPassword: "",
+    confirm_password: "",
     role: "user", // Default role
   });
+
+  const [error, setError] = useState(""); // Error message
+  const [success, setSuccess] = useState(""); // Success message
+  const [isSubmitting, setIsSubmitting] = useState(false); // To prevent multiple submissions
+
+  const navigate = useNavigate(); // Initialize navigate hook
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Registration submitted:", formData);
+
+    setError("");
+    setSuccess("");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/accounts/register/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess("Registration successful! Redirecting to login...");
+        setTimeout(() => {
+          navigate("/login"); // Redirect to the login page
+        }, 2000); // Delay the redirection to show the success message
+        setFormData({
+          username: "",
+          email: "",
+          phone_number: "",
+          password: "",
+          confirm_password: "",
+          role: "user",
+        });
+      } else {
+        setError(data.error || "An error occurred during registration.");
+      }
+    } catch (err) {
+      // Log the error and display a user-friendly message
+      console.error("Registration request failed:", err);
+      setError("Failed to connect to the server. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -26,25 +74,39 @@ const Register = () => {
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
           Register
         </h2>
+        {/* Display error messages */}
+        {error && (
+          <div className="bg-red-100 text-red-800 p-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+        {/* Display success messages */}
+        {success && (
+          <div className="bg-green-100 text-green-800 p-3 rounded mb-4">
+            {success}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name Field */}
+          {/* Username Input */}
           <div>
-            <label htmlFor="name" className="block text-gray-700 font-medium">
-              Name
+            <label
+              htmlFor="username"
+              className="block text-gray-700 font-medium"
+            >
+              Username
             </label>
             <input
               type="text"
-              id="name"
-              name="name"
-              value={formData.name}
+              id="username"
+              name="username"
+              value={formData.username}
               onChange={handleChange}
-              placeholder="Enter your name"
               required
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
-          {/* Email Field */}
+          {/* Email Input */}
           <div>
             <label htmlFor="email" className="block text-gray-700 font-medium">
               Email
@@ -55,30 +117,31 @@ const Register = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your email"
               required
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
-          {/* Phone Number Field */}
+          {/* Phone Number Input */}
           <div>
-            <label htmlFor="phone" className="block text-gray-700 font-medium">
+            <label
+              htmlFor="phone_number"
+              className="block text-gray-700 font-medium"
+            >
               Phone Number
             </label>
             <input
               type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
+              id="phone_number"
+              name="phone_number"
+              value={formData.phone_number}
               onChange={handleChange}
-              placeholder="Enter your phone number"
               required
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
-          {/* Password Field */}
+          {/* Password Input */}
           <div>
             <label
               htmlFor="password"
@@ -92,36 +155,34 @@ const Register = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Enter your password"
               required
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
-          {/* Confirm Password Field */}
+          {/* Confirm Password Input */}
           <div>
             <label
-              htmlFor="confirmPassword"
+              htmlFor="confirm_password"
               className="block text-gray-700 font-medium"
             >
               Confirm Password
             </label>
             <input
               type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
+              id="confirm_password"
+              name="confirm_password"
+              value={formData.confirm_password}
               onChange={handleChange}
-              placeholder="Re-enter your password"
               required
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
-          {/* Role Selection */}
+          {/* Role Input */}
           <div>
             <label htmlFor="role" className="block text-gray-700 font-medium">
-              Select Role
+              Role
             </label>
             <select
               id="role"
@@ -139,12 +200,16 @@ const Register = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300"
+            disabled={isSubmitting} // Disable while submitting
+            className={`w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 ${
+              isSubmitting && "opacity-50 cursor-not-allowed"
+            }`}
           >
-            Register
+            {isSubmitting ? "Registering..." : "Register"}
           </button>
         </form>
 
+        {/* Redirect to login */}
         <div className="text-center mt-4">
           <a href="/login" className="text-green-500 hover:underline text-sm">
             Already have an account? Login
