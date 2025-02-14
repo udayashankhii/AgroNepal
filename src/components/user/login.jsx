@@ -54,7 +54,7 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+        <h2 className="w-full text-2xl font-bold text-center text-gray-800 mb-6">
           Login
         </h2>
 
@@ -109,7 +109,7 @@ const Login = () => {
           </button>
         </form>
         <div className="text-center mt-4">
-          <a href="/register" className="text-blue-500 hover:underline text-sm">
+          <a href="/register" className="text-blue-500 hover: text-color-blue">
             Don’t have an account? Register
           </a>
         </div>

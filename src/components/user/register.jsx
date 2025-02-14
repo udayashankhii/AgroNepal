@@ -44,7 +44,7 @@ const Register = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess("Registration successful! Redirecting to login...");
+        setSuccess("Registration successful! ");
         setTimeout(() => {
           navigate("/login"); // Redirect to the login page
         }, 2000); // Delay the redirection to show the success message
@@ -201,7 +201,7 @@ const Register = () => {
           <button
             type="submit"
             disabled={isSubmitting} // Disable while submitting
-            className={`w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 ${
+            className={`w-full bg-green-600 hover:bg-green-900 text-white font-medium py-2 px-4 rounded-lg transition duration-300 ${
               isSubmitting && "opacity-50 cursor-not-allowed"
             }`}
           >
@@ -211,7 +211,7 @@ const Register = () => {
 
         {/* Redirect to login */}
         <div className="text-center mt-4">
-          <a href="/login" className="text-green-500 hover:underline text-sm">
+          <a href="/login" className="text-green-500 hover lime-900 ">
             Already have an account? Login
           </a>
         </div>
