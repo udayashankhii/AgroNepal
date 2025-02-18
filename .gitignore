@@ -1,0 +1,14 @@
+# Ignore all files in the 'logs' folder
+logs/*
+
+# Ignore all .log files in the 'logs' folder
+logs/*.log
+
+# Ignore specific file in the 'logs' folder
+logs/specific-file.txt
+
+# Ignore all .tmp files in the 'temp' folder
+temp/*.tmp
+
+# Ignore all files in the 'build' folder
+build/*
