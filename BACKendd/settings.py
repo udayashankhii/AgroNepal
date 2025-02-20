@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'accounts',
     'corsheaders',
     'vendor',
+    'products',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -53,6 +54,14 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
+}
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': 'Ghs83fjs8d92jSJKFJs2kds91kd8sJDIW',  # Secure key
 }
 
 MIDDLEWARE = [
