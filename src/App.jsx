@@ -6,7 +6,6 @@ import Register from "./components/user/RegisterForm";
 import Cart from "./components/cart/cart";
 import Checkout from "./components/cart/checkout";
 import PageNotFound from "./components/user/home/404";
-import AboutSection from "./components/user/home/About";
 import ContactUs from "./components/pages/contactus";
 import VendorDashboard from "./components/vendor/VendorDashboard";
 import AddProductPage from "./components/vendor/AddProduct";
@@ -18,6 +17,7 @@ import NavigationBar from "./components/user/home/navigation";
 import Account from "./components/account/account";
 import VendorKYC from "./components/vendor/VendorProfile";
 import ProfileSection from "./components/vendor/VendorProfile";
+import AboutSection from "./components/pages/About";
 
 const App = () => {
   return (
