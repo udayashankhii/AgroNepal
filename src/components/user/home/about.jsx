@@ -38,12 +38,14 @@ const AboutSection = () => {
           <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
             What We Offer
           </h3>
-          <p className="text-gray-600 text-center">
-            Discover a wide range of locally-sourced products, including organic
-            fruits, spices like cardamom and turmeric, fresh honey, and much
-            more. By choosing Agro Nepal, you're investing in the future of
-            Nepal's agriculture.
-          </p>
+          {
+            <p className="text-gray-600 text-center">
+              Discover a wide range of locally-sourced products, including
+              organic fruits, spices like cardamom and turmeric, fresh honey,
+              and much more. By choosing Agro Nepal, youre investing in the
+              future of Nepals agriculture.
+            </p>
+          }
         </div>
       </div>
     </section>
