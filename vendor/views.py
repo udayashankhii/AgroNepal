@@ -76,6 +76,12 @@ def delete_product(request, pk):
 
 
 class ProductList(APIView):
+    """
+    Public API endpoint to list all products
+    No authentication required
+    """
+    permission_classes = []  # Empty list means no permissions required
+
     def get(self, request):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
@@ -282,6 +288,24 @@ class ProductUpdateView(APIView):
                 {"error": "Vendor profile not found"}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+        except Product.DoesNotExist:
+            return Response(
+                {"error": "Product not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class ProductDetailAPI(APIView):
+    """
+    Public API endpoint to view details of a specific product
+    No authentication required
+    """
+    permission_classes = []  # Empty list means no permissions required
+
+    def get(self, request, pk):
+        try:
+            product = Product.objects.get(pk=pk)
+            serializer = ProductSerializer(product)
+            return Response(serializer.data)
         except Product.DoesNotExist:
             return Response(
                 {"error": "Product not found"}, 
