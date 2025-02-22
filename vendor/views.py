@@ -76,6 +76,12 @@ def delete_product(request, pk):
 
 
 class ProductList(APIView):
+    """
+    Public API endpoint to list all products
+    No authentication required
+    """
+    permission_classes = []  # Empty list means no permissions required
+
     def get(self, request):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
@@ -103,79 +109,52 @@ class VendorProfileAPI(APIView):
             )
 
 class VendorProductsAPI(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes_by_method = {
+        'GET': [],  # No authentication for GET
+        'POST': [IsAuthenticated],  # Authentication required for POST
+        'PUT': [IsAuthenticated],
+        'DELETE': [IsAuthenticated]
+    }
 
-    def get(self, request, pk=None):
+    def get_permissions(self):
         try:
-            vendor = Vendor.objects.get(user=request.user)
-            if pk:
-                # Get single product
-                product = Product.objects.get(pk=pk, vendor=vendor)
-                serializer = ProductSerializer(product)
-            else:
-                # Get all products
-                products = Product.objects.filter(vendor=vendor)
-                serializer = ProductSerializer(products, many=True)
+            return [permission() for permission in self.permission_classes_by_method[self.request.method]]
+        except KeyError:
+            return []
+
+    def get(self, request):
+        try:
+            # Get all products
+            products = Product.objects.select_related('vendor').all()
+            serializer = ProductSerializer(products, many=True)
             return Response(serializer.data)
-        except Vendor.DoesNotExist:
-            return Response(
-                {"error": "Vendor profile not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+            
         except Product.DoesNotExist:
             return Response(
-                {"error": "Product not found"}, 
+                {"error": "No products found"}, 
                 status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": "Error fetching products"}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
 
     def post(self, request):
         try:
             vendor = Vendor.objects.get(user=request.user)
-            serializer = ProductSerializer(data=request.data)
+            data = request.data.copy()
+            data['vendor'] = vendor.id
+            
+            serializer = ProductSerializer(data=data)
             if serializer.is_valid():
                 serializer.save(vendor=vendor)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
         except Vendor.DoesNotExist:
             return Response(
                 {"error": "Vendor profile not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-    def put(self, request, pk):
-        try:
-            vendor = Vendor.objects.get(user=request.user)
-            product = Product.objects.get(pk=pk, vendor=vendor)
-            serializer = ProductSerializer(product, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Vendor.DoesNotExist:
-            return Response(
-                {"error": "Vendor profile not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Product.DoesNotExist:
-            return Response(
-                {"error": "Product not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-    def delete(self, request, pk):
-        try:
-            vendor = Vendor.objects.get(user=request.user)
-            product = Product.objects.get(pk=pk, vendor=vendor)
-            product.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Vendor.DoesNotExist:
-            return Response(
-                {"error": "Vendor profile not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Product.DoesNotExist:
-            return Response(
-                {"error": "Product not found"}, 
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -199,6 +178,9 @@ class VendorProductDetailAPI(APIView):
                 {"error": "Vendor profile not found"}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+
+
+   
 
     def put(self, request, pk):
         try:
@@ -243,7 +225,9 @@ class VendorRegistrationAPI(APIView):
             vendor = Vendor.objects.create(
                 user=request.user,
                 shop_name=request.data.get('shop_name'),
-                description=request.data.get('description')
+                description=request.data.get('description'),
+                phone_number=request.data.get('phone_number'),
+                address=request.data.get('address')
             )
             
             return Response({
@@ -251,7 +235,9 @@ class VendorRegistrationAPI(APIView):
                 'vendor': {
                     'id': vendor.id,
                     'shop_name': vendor.shop_name,
-                    'description': vendor.description
+                    'description': vendor.description,
+                    'phone_number': vendor.phone_number,
+                    'address': vendor.address
                 }
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -282,6 +268,20 @@ class ProductUpdateView(APIView):
                 {"error": "Vendor profile not found"}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+        except Product.DoesNotExist:
+            return Response(
+                {"error": "Product not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class ProductDetailAPI(APIView):
+    permission_classes = []  # Public access
+
+    def get(self, request, pk):
+        try:
+            product = Product.objects.get(pk=pk)
+            serializer = ProductSerializer(product)
+            return Response(serializer.data)
         except Product.DoesNotExist:
             return Response(
                 {"error": "Product not found"}, 

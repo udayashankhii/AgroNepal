@@ -18,11 +18,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/accounts/', include('accounts.urls')),  # Account-related URLs
-    path('api/products/', include('products.urls')),  # Product-related URLs
     path('api/cart/', include('cart.urls')),  # Cart-related URLs, with a specific prefix
     path('api/vendor/', include('vendor.urls')),  # Vendor-related URLs, with a specific prefix
+
+
+    path('api/accounts/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/accounts/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+  
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # Media files handling
