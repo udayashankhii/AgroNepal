@@ -109,81 +109,81 @@ class VendorProfileAPI(APIView):
             )
 
 class VendorProductsAPI(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = []  # For GET requests
 
-    def get(self, request, pk=None):
+    def get(self, request):
         try:
-            vendor = Vendor.objects.get(user=request.user)
-            if pk:
-                # Get single product
-                product = Product.objects.get(pk=pk, vendor=vendor)
-                serializer = ProductSerializer(product)
-            else:
-                # Get all products
-                products = Product.objects.filter(vendor=vendor)
-                serializer = ProductSerializer(products, many=True)
+            # Get all products
+            products = Product.objects.select_related('vendor').all()
+            serializer = ProductSerializer(products, many=True)
             return Response(serializer.data)
-        except Vendor.DoesNotExist:
-            return Response(
-                {"error": "Vendor profile not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+            
         except Product.DoesNotExist:
             return Response(
-                {"error": "Product not found"}, 
+                {"error": "No products found"}, 
                 status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": "Error fetching products"}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
 
     def post(self, request):
         try:
+            # Check if the user is authenticated
+            if not request.user.is_authenticated:
+                return Response(
+                    {"error": "Authentication required"}, 
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            # Get the vendor
             vendor = Vendor.objects.get(user=request.user)
-            serializer = ProductSerializer(data=request.data)
+            
+            # Create a mutable copy of request data
+            data = request.data.copy()
+            # Explicitly set the vendor ID in the data
+            data['vendor'] = vendor.id
+            
+            # Create serializer with the modified data
+            serializer = ProductSerializer(data=data)
+            
             if serializer.is_valid():
-                serializer.save(vendor=vendor)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                # Save with the vendor relationship
+                serializer.save(vendor=vendor)  # This ensures the vendor relationship is set
+                return Response(
+                    serializer.data, 
+                    status=status.HTTP_201_CREATED
+                )
+            return Response(
+                serializer.errors, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
         except Vendor.DoesNotExist:
             return Response(
                 {"error": "Vendor profile not found"}, 
                 status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-    def put(self, request, pk):
-        try:
-            vendor = Vendor.objects.get(user=request.user)
-            product = Product.objects.get(pk=pk, vendor=vendor)
-            serializer = ProductSerializer(product, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Vendor.DoesNotExist:
-            return Response(
-                {"error": "Vendor profile not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Product.DoesNotExist:
-            return Response(
-                {"error": "Product not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+    # Keep other methods (put, delete) with authentication if needed
+    permission_classes_by_method = {
+        'POST': [IsAuthenticated],
+        'PUT': [IsAuthenticated],
+        'DELETE': [IsAuthenticated]
+    }
 
-    def delete(self, request, pk):
+    def get_permissions(self):
         try:
-            vendor = Vendor.objects.get(user=request.user)
-            product = Product.objects.get(pk=pk, vendor=vendor)
-            product.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Vendor.DoesNotExist:
-            return Response(
-                {"error": "Vendor profile not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Product.DoesNotExist:
-            return Response(
-                {"error": "Product not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return [permission() for permission in self.permission_classes_by_method[self.request.method]]
+        except KeyError:
+            return [permission() for permission in self.permission_classes]
 
 class VendorProductDetailAPI(APIView):
     permission_classes = [IsAuthenticated]
@@ -205,6 +205,9 @@ class VendorProductDetailAPI(APIView):
                 {"error": "Vendor profile not found"}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+
+
+   
 
     def put(self, request, pk):
         try:
@@ -310,5 +313,10 @@ class ProductDetailAPI(APIView):
             return Response(
                 {"error": "Product not found"}, 
                 status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": "Error fetching product"}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
 
