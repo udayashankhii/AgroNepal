@@ -21,6 +21,9 @@ urlpatterns = [
     path('products/', VendorProductsAPI.as_view(), name='vendor-products-api'),
     path('products/<int:pk>/', VendorProductDetailAPI.as_view(), name='vendor-product-detail-api'),
     
+    # Vendor-specific products endpoint (with vendor_id parameter)
+    path('products/vendor/', VendorProductsAPI.as_view(), name='vendor-products'),
+    
     # Other vendor endpoints
     path('dashboard/', VendorDashboardAPI.as_view(), name='vendor-dashboard-api'),
     path('profile/', VendorProfileAPI.as_view(), name='vendor-profile-api'),

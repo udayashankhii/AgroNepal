@@ -109,11 +109,12 @@ class VendorProfileAPI(APIView):
             )
 
 class VendorProductsAPI(APIView):
+    """
+    API endpoint for vendor-specific products and all products
+    """
     permission_classes_by_method = {
         'GET': [],  # No authentication for GET
         'POST': [IsAuthenticated],  # Authentication required for POST
-        'PUT': [IsAuthenticated],
-        'DELETE': [IsAuthenticated]
     }
 
     def get_permissions(self):
@@ -124,10 +125,18 @@ class VendorProductsAPI(APIView):
 
     def get(self, request):
         try:
-            # Get all products
-            products = Product.objects.select_related('vendor').all()
+            # Check if vendor_id is provided in query params
+            vendor_id = request.query_params.get('vendor_id', None)
+            
+            if vendor_id:
+                # Get vendor-specific products
+                products = Product.objects.filter(vendor_id=vendor_id)
+            else:
+                # Get all products from all vendors
+                products = Product.objects.select_related('vendor').all()
+            
             serializer = ProductSerializer(products, many=True)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
             
         except Product.DoesNotExist:
             return Response(
@@ -136,7 +145,7 @@ class VendorProductsAPI(APIView):
             )
         except Exception as e:
             return Response(
-                {"error": "Error fetching products"}, 
+                {"error": str(e)}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
 
