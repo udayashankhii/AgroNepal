@@ -10,6 +10,8 @@ class Vendor(models.Model):
     description = models.TextField(blank=True, null=True)
     phone_number = models.CharField(max_length=15)
     address = models.TextField()
+    pan_number_image = models.ImageField(upload_to='pan_numbers/', null=True, blank=True)
+    is_verified = models.BooleanField(default=False)
     registration_date = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -21,7 +23,7 @@ class Vendor(models.Model):
 class Product(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=200)
-    description = models.TextField()
+    description = models.TextField(default='No description provided')  # Added default value
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField()
     category = models.CharField(max_length=100)

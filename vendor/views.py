@@ -1,16 +1,18 @@
 # Create your views here.
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from .models import Vendor, Product
 from .forms import VendorRegistrationForm, ProductForm
 from .serializers import ProductSerializer, VendorSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
+from django.urls import reverse
 
 @login_required  # Add a space here
 def vendor_dashboard(request):  # And start function definition on new line
@@ -40,18 +42,26 @@ def vendor_registration(request):
 
 @login_required
 def add_product(request):
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save(commit=False)
-            vendor = Vendor.objects.get(user=request.user)
-            product.vendor = vendor
-            product.save()
-            messages.success(request, 'Product added successfully!')
+    try:
+        vendor = Vendor.objects.get(user=request.user)
+        if not vendor.is_verified:
+            messages.error(request, 'Your shop is not verified yet. Please wait for admin verification.')
             return redirect('vendor_dashboard')
-    else:
-        form = ProductForm()
-    return render(request, 'vendor/add_product.html', {'form': form})
+        
+        if request.method == 'POST':
+            form = ProductForm(request.POST, request.FILES)
+            if form.is_valid():
+                product = form.save(commit=False)
+                product.vendor = vendor
+                product.save()
+                messages.success(request, 'Product added successfully!')
+                return redirect('vendor_dashboard')
+        else:
+            form = ProductForm()
+        return render(request, 'vendor/add_product.html', {'form': form})
+    except Vendor.DoesNotExist:
+        messages.error(request, 'Vendor profile not found.')
+        return redirect('vendor_registration')
 
 @login_required
 def edit_product(request, pk):
@@ -73,7 +83,12 @@ def delete_product(request, pk):
     messages.success(request, 'Product deleted successfully!')
     return redirect('vendor_dashboard')
 
-
+@staff_member_required
+def verify_vendor(request, vendor_id):
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    vendor.is_verified = True
+    vendor.save()
+    return HttpResponseRedirect(reverse('admin:vendor_vendor_changelist'))
 
 class ProductList(APIView):
     """
@@ -110,7 +125,9 @@ class VendorProfileAPI(APIView):
 
 class VendorProductsAPI(APIView):
     """
-    API endpoint for vendor-specific products and all products
+    API endpoint for vendor-specific products
+    GET: Public access to view products by vendor ID
+    POST: Only authenticated vendors can add products
     """
     permission_classes_by_method = {
         'GET': [],  # No authentication for GET
@@ -125,22 +142,40 @@ class VendorProductsAPI(APIView):
 
     def get(self, request):
         try:
-            # Check if vendor_id is provided in query params
-            vendor_id = request.query_params.get('vendor_id', None)
+            # Get vendor_id from URL parameters
+            vendor_id = request.query_params.get('vendor_id')
             
-            if vendor_id:
-                # Get vendor-specific products
-                products = Product.objects.filter(vendor_id=vendor_id)
-            else:
-                # Get all products from all vendors
-                products = Product.objects.select_related('vendor').all()
+            if not vendor_id:
+                return Response(
+                    {"error": "Vendor ID is required"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Check if vendor exists
+            vendor = get_object_or_404(Vendor, id=vendor_id)
+            
+            # Get products for specific vendor
+            products = Product.objects.filter(vendor=vendor)
+            
+            if not products.exists():
+                return Response(
+                    {"message": f"No products found for vendor {vendor.shop_name}"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
             
             serializer = ProductSerializer(products, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({
+                "vendor": {
+                    "id": vendor.id,
+                    "shop_name": vendor.shop_name,
+                    "is_verified": vendor.is_verified
+                },
+                "products": serializer.data
+            })
             
-        except Product.DoesNotExist:
+        except Vendor.DoesNotExist:
             return Response(
-                {"error": "No products found"}, 
+                {"error": "Vendor not found"}, 
                 status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
@@ -188,9 +223,6 @@ class VendorProductDetailAPI(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-
-   
-
     def put(self, request, pk):
         try:
             vendor = Vendor.objects.get(user=request.user)
@@ -236,17 +268,20 @@ class VendorRegistrationAPI(APIView):
                 shop_name=request.data.get('shop_name'),
                 description=request.data.get('description'),
                 phone_number=request.data.get('phone_number'),
-                address=request.data.get('address')
+                address=request.data.get('address'),
+                pan_number_image=request.FILES.get('pan_number_image')
             )
             
             return Response({
-                'message': 'Vendor registration successful!',
+                'message': 'Vendor registration successful! Awaiting verification.',
                 'vendor': {
                     'id': vendor.id,
                     'shop_name': vendor.shop_name,
                     'description': vendor.description,
                     'phone_number': vendor.phone_number,
-                    'address': vendor.address
+                    'address': vendor.address,
+                    'pan_number_image': vendor.pan_number_image.url if vendor.pan_number_image else None,
+                    'is_verified': vendor.is_verified
                 }
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -296,4 +331,44 @@ class ProductDetailAPI(APIView):
                 {"error": "Product not found"}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+
+class VendorVerificationAPI(APIView):
+    """
+    API endpoint for admin to verify vendors
+    Only admin users can access this endpoint
+    """
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        # List all unverified vendors
+        unverified_vendors = Vendor.objects.filter(is_verified=False)
+        serializer = VendorSerializer(unverified_vendors, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, vendor_id):
+        try:
+            vendor = Vendor.objects.get(id=vendor_id)
+            vendor.is_verified = True
+            vendor.save()
+            
+            return Response({
+                'message': f'Vendor {vendor.shop_name} has been verified successfully',
+                'vendor': VendorSerializer(vendor).data
+            }, status=status.HTTP_200_OK)
+            
+        except Vendor.DoesNotExist:
+            return Response({
+                'error': 'Vendor not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    def get_pending_verifications(self, request):
+        # Get count of pending verifications
+        pending_count = Vendor.objects.filter(is_verified=False).count()
+        return Response({
+            'pending_verifications': pending_count
+        })
 
