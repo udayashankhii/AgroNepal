@@ -1,5 +1,16 @@
-import { useState } from "react";
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import axios from "axios";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const AddProductPage = () => {
@@ -66,80 +77,90 @@ const AddProductPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-lg">
-        <h2 className="text-2xl font-bold text-green-700 mb-6">
+    <Box className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <Box className="w-[350px] rounded-lg shadow-lg bg-white p-6">
+        <Typography variant="h5" className="font-bold text-green-700 mb-6">
           Add New Product
-        </h2>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Product Name</label>
-          <input
-            type="text"
+        </Typography>
+
+        {/* Image Upload */}
+        <Box className="h-[200px] w-full overflow-hidden mb-4 bg-gray-200 flex items-center justify-center">
+          {newProduct.image ? (
+            <img
+              src={URL.createObjectURL(newProduct.image)}
+              alt="Product Preview"
+              className="object-cover w-full h-full"
+            />
+          ) : (
+            <Typography variant="body2" className="text-gray-500">
+              No Image Selected
+            </Typography>
+          )}
+        </Box>
+
+        <Stack spacing={2}>
+          <TextField
+            fullWidth
+            label="Product Name"
             name="name"
             value={newProduct.name}
             onChange={handleInputChange}
-            className="w-full border rounded p-2"
           />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Price</label>
-          <input
-            type="number"
+
+          <TextField
+            fullWidth
+            label="Price (NPR)"
             name="price"
+            type="number"
             value={newProduct.price}
             onChange={handleInputChange}
-            className="w-full border rounded p-2"
           />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Category</label>
-          <select
-            name="category"
-            value={newProduct.category}
-            onChange={handleInputChange}
-            className="w-full border rounded p-2"
-          >
-            <option value="">Select Category</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.name}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Description</label>
-          <textarea
+
+          <FormControl fullWidth>
+            <InputLabel>Category</InputLabel>
+            <Select
+              name="category"
+              value={newProduct.category}
+              onChange={handleInputChange}
+            >
+              {categories.map((category) => (
+                <MenuItem key={category.id} value={category.name}>
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <TextField
+            fullWidth
+            label="Description"
             name="description"
+            multiline
+            rows={3}
             value={newProduct.description}
             onChange={handleInputChange}
-            className="w-full border rounded p-2"
           />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Image</label>
-          <input
-            type="file"
-            onChange={handleFileChange}
-            className="w-full border rounded p-2"
-          />
-        </div>
-        <div className="flex justify-end space-x-4">
-          <button
-            onClick={() => navigate("/vendor-dashboard")}
-            className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="bg-green-700 text-white py-2 px-4 rounded hover:bg-green-800"
-          >
-            Add Product
-          </button>
-        </div>
-      </div>
-    </div>
+
+          <Button variant="contained" component="label" fullWidth>
+            Upload Image
+            <input type="file" hidden onChange={handleFileChange} />
+          </Button>
+
+          <Box className="flex justify-between mt-4">
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => navigate("/vendor-dashboard")}
+            >
+              Cancel
+            </Button>
+            <Button variant="contained" color="success" onClick={handleSubmit}>
+              Add Product
+            </Button>
+          </Box>
+        </Stack>
+      </Box>
+    </Box>
   );
 };
 

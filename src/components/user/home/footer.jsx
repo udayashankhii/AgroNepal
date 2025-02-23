@@ -28,12 +28,12 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="Product" className="text-sm hover:underline">
+              <a href="products" className="text-sm hover:underline">
                 Products
               </a>
             </li>
             <li>
-              <a href="contact" className="text-sm hover:underline">
+              <a href="contactus" className="text-sm hover:underline">
                 Contact
               </a>
             </li>

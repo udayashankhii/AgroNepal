@@ -13,7 +13,7 @@ export default function NavigationBar() {
   };
 
   const handleProductsClick = () => {
-    navigate("/product");
+    navigate("/products");
   };
 
   const handleCategoriesClick = () => {

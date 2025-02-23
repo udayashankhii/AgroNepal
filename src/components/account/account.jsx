@@ -103,7 +103,9 @@ function Orders() {
             <span className="text-sm text-gray-500">March 15, 2024</span>
           </div>
           <div className="text-sm text-gray-600">
-            <p>Status: <span className="text-green-600">Delivered</span></p>
+            <p>
+              Status: <span className="text-green-600">Delivered</span>
+            </p>
             <p>Total: NPR 2,500</p>
           </div>
         </div>

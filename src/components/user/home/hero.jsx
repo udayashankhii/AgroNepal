@@ -5,7 +5,7 @@ const Hero = () => {
   const navigate = useNavigate(); // Hook for navigation
 
   const handleExploreProducts = () => {
-    navigate("/product"); // Redirect to the products page
+    navigate("/products"); // Redirect to the products page
   };
 
   return (
