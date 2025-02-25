@@ -23,7 +23,7 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     username = models.CharField(max_length=255, unique=False)
     email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=15, unique=True,)
+    phone_number = models.CharField(max_length=15, unique=False,)
     role = models.CharField(max_length=10, choices=[("vendor", "Vendor"), ("user", "User")], default="user")
     is_verified = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, blank=True, null=True)
@@ -37,7 +37,7 @@ class User(AbstractUser):
     def generate_otp(self):
         """Generate OTP for user."""
         self.otp = str(random.randint(100000, 999999))
-        self.otp_expiry = timezone.now() + timezone.timedelta(minutes=45)
+        self.otp_expiry = timezone.now() + timezone.timedelta(minutes=10)
         self.save()
 
     @property

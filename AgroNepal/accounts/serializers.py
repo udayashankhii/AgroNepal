@@ -1,7 +1,9 @@
-from django.contrib.auth import authenticate
 from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,6 +50,7 @@ class LoginSerializer(serializers.Serializer):
         return {
             "access": str(tokens.access_token),
             "refresh": str(tokens),
+            "role": user.role
         }
 
 class GoogleLoginSerializer(serializers.Serializer):
