@@ -1,4 +1,9 @@
-const categories = [
+
+import { Link } from 'react-router-dom';
+
+
+
+export const categories = [
   { id: 1, name: "Fruits", description: "Fresh and organic fruits" },
   { id: 2, name: "Vegetables", description: "Farm-fresh vegetables" },
   { id: 3, name: "Spices", description: "A variety of spices from Nepal" },
@@ -30,9 +35,11 @@ function Category() {
                 {category.name}
               </h3>
               <p className="text-gray-600 mt-2">{category.description}</p>
-              <button className="mt-4 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                View Products
-              </button>
+              <Link to={`/category/${category.id}`}>
+                <button className="mt-4 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                  View Products
+                </button>
+              </Link>
             </div>
           ))}
         </div>

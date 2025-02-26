@@ -1,337 +1,125 @@
-// import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  Step,
-  StepLabel,
-  Stepper,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { styled } from "@mui/material/styles";
+// VendorKycForm.js
 import { useState } from "react";
 
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
+function VendorKycForm() {
+const [formData, setFormData] = useState({
+shop_name: "",
+description: "",
+phone_number: "",
+address: "",
+pan_number_image: null,
 });
+const [loading, setLoading] = useState(false);
+const [message, setMessage] = useState("");
+const [messageType, setMessageType] = useState(""); // "success" or "error"
 
-const VendorKYC = () => {
-  const [activeStep, setActiveStep] = useState(0);
-  const [kycVerified, setKycVerified] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    shopName: "",
-    address: "",
-    nationalId: "",
-    idFront: null,
-    idBack: null,
-    phone: "",
-    email: "",
-  });
-
-  const [productData, setProductData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    category: "",
-    images: [],
-  });
-
-  const handleKYCChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleFileUpload = (file, side) => {
-    setFormData({ ...formData, [side]: file });
-  };
-
-  const handleKYCSubmit = async (e) => {
-    e.preventDefault();
-    // Simulated API call
-    setTimeout(() => {
-      setKycVerified(true);
-      setActiveStep(1);
-    }, 2000);
-  };
-
-  const handleProductChange = (e) => {
-    setProductData({ ...productData, [e.target.name]: e.target.value });
-  };
-
-  const handleProductSubmit = (e) => {
-    e.preventDefault();
-    if (kycVerified) {
-      console.log("Product submitted:", productData);
-    }
-  };
-
-  const steps = ["KYC Verification", "Add Products"];
-
-  return (
-    <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
-      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-
-      {!kycVerified ? (
-        <Card component="form" onSubmit={handleKYCSubmit}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Vendor KYC Verification
-            </Typography>
-
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="First Name"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleKYCChange}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Last Name"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleKYCChange}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Shop Name"
-                  name="shopName"
-                  value={formData.shopName}
-                  onChange={handleKYCChange}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleKYCChange}
-                  required
-                  multiline
-                  rows={3}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="National ID Number"
-                  name="nationalId"
-                  value={formData.nationalId}
-                  onChange={handleKYCChange}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Phone Number"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleKYCChange}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleKYCChange}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Button
-                  component="label"
-                  variant="contained"
-                  startIcon={<CloudUploadIcon />}
-                  fullWidth
-                >
-                  Upload ID Front
-                  <VisuallyHiddenInput
-                    type="file"
-                    onChange={(e) =>
-                      handleFileUpload(e.target.files[0], "idFront")
-                    }
-                    accept="image/*"
-                  />
-                </Button>
-                {formData.idFront && (
-                  <Typography variant="caption" color="text.secondary">
-                    {formData.idFront.name}
-                  </Typography>
-                )}
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Button
-                  component="label"
-                  variant="contained"
-                  startIcon={<CloudUploadIcon />}
-                  fullWidth
-                >
-                  Upload ID Back
-                  <VisuallyHiddenInput
-                    type="file"
-                    onChange={(e) =>
-                      handleFileUpload(e.target.files[0], "idBack")
-                    }
-                    accept="image/*"
-                  />
-                </Button>
-                {formData.idBack && (
-                  <Typography variant="caption" color="text.secondary">
-                    {formData.idBack.name}
-                  </Typography>
-                )}
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  sx={{ mt: 2 }}
-                  disabled={!Object.values(formData).every(Boolean)}
-                >
-                  Submit KYC
-                </Button>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card component="form" onSubmit={handleProductSubmit}>
-          <CardContent>
-            <Alert severity="success" sx={{ mb: 3 }}>
-              KYC Verified! You can now add products.
-            </Alert>
-
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Product Name"
-                  name="name"
-                  value={productData.name}
-                  onChange={handleProductChange}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Description"
-                  name="description"
-                  value={productData.description}
-                  onChange={handleProductChange}
-                  required
-                  multiline
-                  rows={4}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Price"
-                  name="price"
-                  type="number"
-                  value={productData.price}
-                  onChange={handleProductChange}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Category"
-                  name="category"
-                  value={productData.category}
-                  onChange={handleProductChange}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  component="label"
-                  variant="outlined"
-                  startIcon={<CloudUploadIcon />}
-                  fullWidth
-                >
-                  Upload Product Images
-                  <VisuallyHiddenInput
-                    type="file"
-                    multiple
-                    onChange={(e) =>
-                      setProductData({
-                        ...productData,
-                        images: [...e.target.files],
-                      })
-                    }
-                    accept="image/*"
-                  />
-                </Button>
-                <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
-                  {productData.images.map((file, index) => (
-                    <Avatar
-                      key={index}
-                      variant="rounded"
-                      src={URL.createObjectURL(file)}
-                      sx={{ width: 100, height: 100 }}
-                    />
-                  ))}
-                </Box>
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  disabled={!Object.values(productData).every(Boolean)}
-                >
-                  Add Product
-                </Button>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      )}
-    </Box>
-  );
+// Handle text input changes
+const handleChange = (e) => {
+setFormData({ ...formData, [e.target.name]: e.target.value });
 };
 
-export default VendorKYC;
+// Handle file input (program takes only the first file)
+const handleFileChange = (e) => {
+setFormData({ ...formData, pan_number_image: e.target.files });
+};
+
+// Submit the KYC form
+const handleSubmit = async (e) => {
+e.preventDefault();
+setLoading(true);
+setMessage("");
+setMessageType("");
+
+
+const token = localStorage.getItem("accessToken");
+if (!token) {
+  setMessage("Error: Access token not found. Please log in.");
+  setMessageType("error");
+  setLoading(false);
+  return;
+}
+
+try {
+  // Build FormData to include both fields and file
+  const payload = new FormData();
+  payload.append("shop_name", formData.shop_name);
+  payload.append("description", formData.description);
+  payload.append("phone_number", formData.phone_number);
+  payload.append("address", formData.address);
+  if (formData.pan_number_image) {
+    payload.append("pan_number_image", formData.pan_number_image);
+  }
+
+  const response = await fetch("http://127.0.0.1:8000/api/vendor/kyc/", {
+    method: "POST",
+    // When using FormData, do NOT set Content-Type manually.
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: payload,
+  });
+
+  const data = await response.json();
+  if (response.ok) {
+    setMessage("KYC submitted successfully!");
+    setMessageType("success");
+    // Clear the form upon successful submission
+    setFormData({
+      shop_name: "",
+      description: "",
+      phone_number: "",
+      address: "",
+      pan_number_image: null,
+    });
+  } else {
+    setMessage(`Error: ${data.message || "Failed to submit KYC"}`);
+    setMessageType("error");
+  }
+} catch (error) {
+  setMessage("Network error. Please try again later.");
+  setMessageType("error");
+} finally {
+  setLoading(false);
+}
+};
+
+return (
+<div className="max-w-2xl mx-auto p-6 bg-white shadow rounded-lg">
+<h2 className="text-2xl font-bold mb-4">Vendor KYC Form</h2>
+{message && (
+<p
+className={mb-4 text-center ${ messageType === "error" ? "text-red-600" : "text-green-600" }}
+>
+
+</p>
+)}
+<form onSubmit={handleSubmit} className="space-y-4">
+<div>
+<label className="block text-sm font-medium">Shop Name</label>
+<input type="text" name="shop_name" value={formData.shop_name} onChange={handleChange} required className="w-full px-3 py-2 border rounded-md" />
+</div>
+<div>
+<label className="block text-sm font-medium">Description</label>
+<textarea name="description" value={formData.description} onChange={handleChange} required className="w-full px-3 py-2 border rounded-md" ></textarea>
+</div>
+<div>
+<label className="block text-sm font-medium">Phone Number</label>
+<input type="text" name="phone_number" value={formData.phone_number} onChange={handleChange} required className="w-full px-3 py-2 border rounded-md" />
+</div>
+<div>
+<label className="block text-sm font-medium">Address</label>
+<input type="text" name="address" value={formData.address} onChange={handleChange} required className="w-full px-3 py-2 border rounded-md" />
+</div>
+<div>
+<label className="block text-sm font-medium">PAN Number Image</label>
+<input type="file" name="pan_number_image" onChange={handleFileChange} className="w-full" />
+</div>
+<button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700" >
+{loading ? "Submitting..." : "Submit KYC"}
+</button>
+</form>
+</div>
+);
+}
+
+export default VendorKycForm;

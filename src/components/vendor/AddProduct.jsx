@@ -1,4 +1,3 @@
-// AddProductPage.jsx
 import {
   Box,
   Button,
@@ -20,7 +19,8 @@ const AddProductPage = () => {
     price: "",
     category: "",
     description: "",
-    image: null,
+    stock: "",
+    image: null, // For file upload
   });
 
   const [categories] = useState([
@@ -50,7 +50,21 @@ const AddProductPage = () => {
 
   const handleSubmit = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        throw new Error("No access token found. Please log in.");
+      }
+
+      const formData = new FormData();
+      formData.append("name", newProduct.name);
+      formData.append("description", newProduct.description);
+      formData.append("price", newProduct.price);
+      formData.append("stock", newProduct.stock);
+      formData.append("category", newProduct.category);
+      if (newProduct.image) {
+        formData.append("image", newProduct.image);
+      }
+
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -58,25 +72,17 @@ const AddProductPage = () => {
         },
       };
 
-      const formData = new FormData();
-      formData.append("name", newProduct.name);
-      formData.append("price", newProduct.price);
-      formData.append("category", newProduct.category);
-      formData.append("description", newProduct.description);
-      formData.append("image", newProduct.image);
-
       await axios.post(
-        "http://localhost:8000/api/vendor/products/",
+        "http://127.0.0.1:8000/api/vendor/products/",
         formData,
         config
       );
 
-      // Navigation with refresh trigger
       navigate("/vendor-dashboard", {
         state: { shouldRefreshProducts: Date.now() },
       });
     } catch (error) {
-      console.error("Error adding product:", error);
+      console.error("Error adding product:", error.response?.data || error);
     }
   };
 
@@ -86,20 +92,6 @@ const AddProductPage = () => {
         <Typography variant="h5" className="font-bold text-green-700 mb-6">
           Add New Product
         </Typography>
-        Image Upload
-        <Box className="h-[200px] w-full overflow-hidden mb-4 bg-gray-200 flex items-center justify-center">
-          {newProduct.image ? (
-            <img
-              src={URL.createObjectURL(newProduct.image)}
-              alt="Product Preview"
-              className="object-cover w-full h-full"
-            />
-          ) : (
-            <Typography variant="body2" className="text-gray-500">
-              No Image Selected
-            </Typography>
-          )}
-        </Box>
         <Stack spacing={2}>
           <TextField
             fullWidth
@@ -108,7 +100,6 @@ const AddProductPage = () => {
             value={newProduct.name}
             onChange={handleInputChange}
           />
-
           <TextField
             fullWidth
             label="Price (NPR)"
@@ -117,7 +108,14 @@ const AddProductPage = () => {
             value={newProduct.price}
             onChange={handleInputChange}
           />
-
+          <TextField
+            fullWidth
+            label="Stock"
+            name="stock"
+            type="number"
+            value={newProduct.stock}
+            onChange={handleInputChange}
+          />
           <FormControl fullWidth>
             <InputLabel>Category</InputLabel>
             <Select
@@ -132,7 +130,6 @@ const AddProductPage = () => {
               ))}
             </Select>
           </FormControl>
-
           <TextField
             fullWidth
             label="Description"
@@ -142,25 +139,21 @@ const AddProductPage = () => {
             value={newProduct.description}
             onChange={handleInputChange}
           />
-
-          <Button variant="contained" component="label" fullWidth>
-            Upload Image
-            <input type="file" hidden onChange={handleFileChange} />
-          </Button>
-
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="mt-2"
+          />
           <Box className="flex justify-between mt-4">
             <Button
               variant="outlined"
               color="error"
-              onClick={() => navigate("/vendor/dashboard")}
+              onClick={() => navigate("/vendor-dashboard")}
             >
               Cancel
             </Button>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={handleSubmit} // This triggers the navigation
-            >
+            <Button variant="contained" color="success" onClick={handleSubmit}>
               Add Product
             </Button>
           </Box>

@@ -1,72 +1,100 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
+// Main registration component with updated fields/flow
 const Register = () => {
+  // Update state key from phone to phone_number
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     phone_number: "",
     password: "",
     confirm_password: "",
-    role: "user", // Default role
+    role: "user",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
-  const [error, setError] = useState(""); // Error message
-  const [success, setSuccess] = useState(""); // Success message
-  const [isSubmitting, setIsSubmitting] = useState(false); // To prevent multiple submissions
-
-  const navigate = useNavigate(); // Initialize navigate hook
-
+  // Handler for input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  // Updated form submission handler to reflect OTP verification flow
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setError("");
-    setSuccess("");
+    // Verify matching passwords before sending
+    if (formData.password !== formData.confirm_password) {
+      toast.error("Passwords do not match", {
+        position: "top-right",
+        theme: "colored",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      // Updated API endpoint port
       const response = await fetch(
         "http://127.0.0.1:8000/api/accounts/register/",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
+          headers: { "Content-Type": "application/json" },
+          // Send phone_number rather than phone
+          body: JSON.stringify({
+            username: formData.username,
+            email: formData.email,
+            phone_number: formData.phone_number,
+            password: formData.password,
+            confirm_password: formData.confirm_password,
+            role: formData.role,
+          }),
         }
       );
 
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess("Registration successful! ");
-        setTimeout(() => {
-          navigate("/login"); // Redirect to the login page
-        }, 2000); // Delay the redirection to show the success message
-        setFormData({
-          username: "",
-          email: "",
-          phone_number: "",
-          password: "",
-          confirm_password: "",
-          role: "user",
+        // Since tokens are now issued after OTP verification,
+        // inform the user and redirect to OTP verification page.
+        toast.success("Registration successful! Please verify OTP.", {
+          position: "top-right",
+          autoClose: 2000,
+          theme: "colored",
+          onClose: () => navigate("/verify-otp"),
         });
       } else {
-        setError(data.error || "An error occurred during registration.");
+        const errorMessage =
+          data.detail ||
+          Object.entries(data)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join("\n");
+        toast.error(errorMessage, {
+          position: "top-right",
+          theme: "colored",
+        });
       }
     } catch (err) {
-      // Log the error and display a user-friendly message
-      console.error("Registration request failed:", err);
-      setError("Failed to connect to the server. Please try again later.");
+      toast.error("Network error. Please try again.", {
+        position: "top-right",
+        theme: "colored",
+      });
+      console.error("Registration error:", err);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Handler for "Continue with Google" remains unchanged.
+  // const handleGoogleRegister = () => {
+  //   window.location.href =
+  //     "http://127.0.0.1:8000/api/accounts/google-register/";
+  // };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -74,20 +102,10 @@ const Register = () => {
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
           Register
         </h2>
-        {/* Display error messages */}
-        {error && (
-          <div className="bg-red-100 text-red-800 p-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-        {/* Display success messages */}
-        {success && (
-          <div className="bg-green-100 text-green-800 p-3 rounded mb-4">
-            {success}
-          </div>
-        )}
+
+        {/* Registration Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Username Input */}
+          {/* Username Field */}
           <div>
             <label
               htmlFor="username"
@@ -106,7 +124,7 @@ const Register = () => {
             />
           </div>
 
-          {/* Email Input */}
+          {/* Email Field */}
           <div>
             <label htmlFor="email" className="block text-gray-700 font-medium">
               Email
@@ -122,7 +140,7 @@ const Register = () => {
             />
           </div>
 
-          {/* Phone Number Input */}
+          {/* Phone Number Field */}
           <div>
             <label
               htmlFor="phone_number"
@@ -141,7 +159,24 @@ const Register = () => {
             />
           </div>
 
-          {/* Password Input */}
+          {/* Role Selector */}
+          <div>
+            <label htmlFor="role" className="block text-gray-700 font-medium">
+              Role
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="user">User</option>
+              <option value="vendor">Vendor</option>
+            </select>
+          </div>
+
+          {/* Password Field */}
           <div>
             <label
               htmlFor="password"
@@ -160,7 +195,7 @@ const Register = () => {
             />
           </div>
 
-          {/* Confirm Password Input */}
+          {/* Confirm Password Field */}
           <div>
             <label
               htmlFor="confirm_password"
@@ -179,28 +214,10 @@ const Register = () => {
             />
           </div>
 
-          {/* Role Input */}
-          <div>
-            <label htmlFor="role" className="block text-gray-700 font-medium">
-              Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              required
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              <option value="user">User</option>
-              <option value="vendor">Vendor</option>
-            </select>
-          </div>
-
-          {/* Submit Button */}
+          {/* Register Button */}
           <button
             type="submit"
-            disabled={isSubmitting} // Disable while submitting
+            disabled={isSubmitting}
             className={`w-full bg-green-600 hover:bg-green-900 text-white font-medium py-2 px-4 rounded-lg transition duration-300 ${
               isSubmitting && "opacity-50 cursor-not-allowed"
             }`}
@@ -208,13 +225,46 @@ const Register = () => {
             {isSubmitting ? "Registering..." : "Register"}
           </button>
         </form>
-
-        {/* Redirect to login */}
+        {/* Google Registration
+        <div className="mt-6">
+          <div className="flex items-center justify-center mb-4">
+            <span className="border-b w-1/5 lg:w-1/4"></span>
+            <span className="text-xs text-center text-gray-500 uppercase mx-2">
+              or
+            </span>
+            <span className="border-b w-1/5 lg:w-1/4"></span>
+          </div>
+          <button
+            type="button"
+            onClick={handleGoogleRegister}
+            className="w-full flex justify-center items-center border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition duration-300 hover:bg-gray-100"
+          >
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+              alt="Google logo"
+              className="w-5 h-5 mr-2"
+            />
+            Continue with Google
+          </button>
+        </div> */}
+        {/* Link to Login Page */}
         <div className="text-center mt-4">
-          <a href="/login" className="text-green-500 hover lime-900 ">
+          <a href="/login" className="text-green-500 hover:text-green-900">
             Already have an account? Login
           </a>
         </div>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
       </div>
     </div>
   );

@@ -1,31 +1,30 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+
+const GOOGLE_CLIENT_ID =
+  "302616355850-0knckl0gobuncismjobvjldf692ghre6.apps.googleusercontent.com"; // Replace with your Google Client ID
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
+    setLoading(true);
 
     try {
       const response = await fetch(
         "http://127.0.0.1:8000/api/accounts/login/",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         }
       );
@@ -33,89 +32,176 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Save token and email to localStorage
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("email", formData.email);
+        localStorage.setItem("accessToken", data.access);
+        localStorage.setItem("refreshToken", data.refresh);
+        localStorage.setItem("role", data.role);
 
-        // Redirect to the home page
-        navigate("/");
-
-        // Trigger navigation bar to update
-        window.location.reload();
+        toast.success("Login successful!");
+        setTimeout(() => {
+          navigate("/");
+          window.location.reload();
+        }, 1500);
       } else {
-        setError(data.error || "Invalid email or password.");
+        toast.error(data.detail || "Invalid credentials");
       }
     } catch (error) {
-      console.error("Login request failed:", error);
-      setError("Failed to connect to the server. Please try again later.");
+      toast.error("Error connecting to server.");
+    }
+
+    setLoading(false);
+  };
+
+  const handleGoogleSuccess = async (response) => {
+    try {
+      const googleToken = response.credential;
+      const googleResponse = await fetch(
+        "http://127.0.0.1:8000/api/accounts/google-login/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: googleToken }),
+        }
+      );
+
+      const data = await googleResponse.json();
+
+      if (googleResponse.ok) {
+        localStorage.setItem("accessToken", data.access);
+        localStorage.setItem("refreshToken", data.refresh);
+        localStorage.setItem("role", data.role);
+
+        toast.success("Google login successful!");
+        setTimeout(() => {
+          navigate("/");
+          window.location.reload();
+        }, 1500);
+      } else {
+        toast.error("Google login failed.");
+      }
+    } catch (error) {
+      toast.error("Error connecting to server.");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-        <h2 className="w-full text-2xl font-bold text-center text-gray-800 mb-6">
-          Login
-        </h2>
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="bg-white shadow-lg rounded-lg p-6 w-96">
+        <h2 className="text-2xl font-semibold text-center mb-4">Login</h2>
 
-        {error && (
-          <div className="bg-red-100 text-red-800 p-3 rounded mb-4">
-            {error}
-          </div>
-        )}
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none"
+          />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              required
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              required
-              className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        <div className="text-center mt-4">
-          <a href="/register" className="text-blue-500 hover: text-color-blue">
-            Don’t have an account? Register
-          </a>
+
+        <div className="mt-4 text-center">
+          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => toast.error("Google login failed.")}
+            />
+          </GoogleOAuthProvider>
         </div>
+
+        <p className="text-center mt-4 text-sm">
+          Don't have an account?{" "}
+          <a href="/register" className="text-blue-600 hover:underline">
+            Register
+          </a>
+        </p>
       </div>
     </div>
   );
 };
 
 export default Login;
+
+// import { useState } from "react";
+// import { useNavigate } from "react-router-dom";
+// import { toast } from "react-toastify";
+// import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+
+// const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+// const Login = () => {
+//   const navigate = useNavigate();
+//   const [loading, setLoading] = useState(false);
+
+//   const handleGoogleSuccess = async (response) => {
+//     setLoading(true);
+//     try {
+//       const googleToken = response.credential;
+
+//       const res = await fetch("http://127.0.0.1:8000/api/accounts/google-login/", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ token: googleToken }),
+//       });
+
+//       const data = await res.json();
+
+//       if (res.ok) {
+//         localStorage.setItem("accessToken", data.accessToken);
+//         localStorage.setItem("refreshToken", data.refreshToken);
+//         localStorage.setItem("role", data.role);
+
+//         toast.success("Google login successful!");
+//         setTimeout(() => {
+//           navigate("/");
+//           window.location.reload();
+//         }, 1500);
+//       } else {
+//         toast.error(data.message || "Google login failed.");
+//       }
+//     } catch (error) {
+//       toast.error("Error connecting to server.");
+//     }
+//     setLoading(false);
+//   };
+
+//   return (
+//     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+//       <div className="flex min-h-screen items-center justify-center bg-gray-100">
+//         <div className="bg-white shadow-lg rounded-lg p-6 w-96">
+//           <h2 className="text-2xl font-semibold text-center mb-4">Login</h2>
+
+//           <div className="flex flex-col items-center">
+//             {loading ? (
+//               <p className="text-blue-600 font-semibold">Processing...</p>
+//             ) : (
+//               <GoogleLogin
+//                 onSuccess={handleGoogleSuccess}
+//                 onError={() => toast.error("Google login failed.")}
+//               />
+//             )}
+//           </div>
+//         </div>
+//       </div>
+//     </GoogleOAuthProvider>
+//   );
+// };
+
+// export default Login;

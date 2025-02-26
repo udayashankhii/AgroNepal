@@ -27,12 +27,17 @@ function useCart() {
 
   const itemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
+  // Calculate total price
+  const total = cart.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
+
   return {
     cart,
     addItem,
     removeItem,
     clearCart,
     itemCount,
+    total, // ✅ Now included total in the return
   };
 }
+
 export default useCart;
