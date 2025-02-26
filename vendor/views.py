@@ -334,41 +334,104 @@ class ProductDetailAPI(APIView):
 
 class VendorVerificationAPI(APIView):
     """
-    API endpoint for admin to verify vendors
-    Only admin users can access this endpoint
+    API endpoint for admin to manage vendor verifications
+    Methods:
+    - GET: List vendors (filter by verification status)
+    - PUT: Update vendor verification status
     """
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        # List all unverified vendors
-        unverified_vendors = Vendor.objects.filter(is_verified=False)
-        serializer = VendorSerializer(unverified_vendors, many=True)
-        return Response(serializer.data)
+        # Get status from URL kwargs or query params
+        status_filter = request.kwargs.get('status') or request.query_params.get('status')
+        
+        # Base queryset
+        vendors = Vendor.objects.all()
+        
+        # Apply filters
+        if status_filter == 'verified':
+            vendors = vendors.filter(is_verified=True)
+        elif status_filter == 'unverified':
+            vendors = vendors.filter(is_verified=False)
+        
+        serializer = VendorSerializer(vendors, many=True)
+        return Response({
+            'count': vendors.count(),
+            'vendors': serializer.data
+        })
 
-    def post(self, request, vendor_id):
+    def put(self, request, vendor_id):
         try:
             vendor = Vendor.objects.get(id=vendor_id)
+            
+            # Set verification status to True
             vendor.is_verified = True
             vendor.save()
             
             return Response({
+                'status': 'success',
                 'message': f'Vendor {vendor.shop_name} has been verified successfully',
                 'vendor': VendorSerializer(vendor).data
             }, status=status.HTTP_200_OK)
             
         except Vendor.DoesNotExist:
             return Response({
-                'error': 'Vendor not found'
+                'status': 'error',
+                'message': 'Vendor not found'
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({
-                'error': str(e)
+                'status': 'error',
+                'message': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_pending_verifications(self, request):
-        # Get count of pending verifications
-        pending_count = Vendor.objects.filter(is_verified=False).count()
+class VendorManagementAPI(APIView):
+    """
+    API endpoint for admin to manage vendors
+    GET: List all vendors with optional verification filter
+    DELETE: Remove a vendor
+    """
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request):
+        verification_status = request.query_params.get('status')
+        vendors = Vendor.objects.all()
+        
+        if verification_status == 'verified':
+            vendors = vendors.filter(is_verified=True)
+        elif verification_status == 'unverified':
+            vendors = vendors.filter(is_verified=False)
+        
+        serializer = VendorSerializer(vendors, many=True)
         return Response({
-            'pending_verifications': pending_count
+            'count': vendors.count(),
+            'vendors': serializer.data
         })
+
+    def delete(self, request, vendor_id):
+        try:
+            vendor = Vendor.objects.get(id=vendor_id)
+            vendor_info = {
+                'id': vendor.id,
+                'shop_name': vendor.shop_name,
+                'user_email': vendor.user.email
+            }
+            vendor.user.delete()  # This will cascade delete the vendor
+            
+            return Response({
+                'status': 'success',
+                'message': 'Vendor deleted successfully',
+                'deleted_vendor': vendor_info
+            }, status=status.HTTP_200_OK)
+            
+        except Vendor.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Vendor not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
