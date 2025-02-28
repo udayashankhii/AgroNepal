@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Box,
   Container,
@@ -11,20 +11,20 @@ import {
   TextField,
   Stack,
 } from "@mui/material";
-import VendorProductCard from "./VendorProductCard";
-import { useNavigate } from "react-router-dom";
+import VendorNavbar from "./VendorNavbar"; // Navbar Component
+import VendorProductCard from "./VendorProductCard"; // Product Card Component
 
 const VendorDashboard = () => {
   const [products, setProducts] = useState([]);
   const [editProduct, setEditProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
-  const location = useLocation();
   const navigate = useNavigate();
 
-  const fetchData = async () => {
+  // Fetch products for the vendor
+  const fetchProducts = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      const vendorId = localStorage.getItem("vendorId"); // Now comes from API
+      const vendorId = localStorage.getItem("vendorId");
 
       const config = {
         headers: { Authorization: `Bearer ${token}` },
@@ -37,7 +37,7 @@ const VendorDashboard = () => {
       );
       setProducts(response.data.products);
     } catch (error) {
-      console.error("Error fetching vendor data:", error);
+      console.error("Error fetching products:", error);
     }
   };
 
@@ -59,11 +59,8 @@ const VendorDashboard = () => {
           navigate("/vendor-profile");
         }
 
-        // Store vendor ID from API response instead of localStorage
-        const vendorId = response.data.id.toString();
-        localStorage.setItem("vendorId", vendorId);
-
-        fetchData();
+        localStorage.setItem("vendorId", response.data.id.toString());
+        fetchProducts();
       } catch (error) {
         console.error("Verification check failed:", error);
         navigate("/vendor-profile");
@@ -73,7 +70,7 @@ const VendorDashboard = () => {
     checkVendorVerification();
   }, [navigate]);
 
-  // Function to send updates for product modifications.
+  // Update product details
   const handleUpdateProduct = async () => {
     try {
       if (!editProduct) return;
@@ -90,21 +87,18 @@ const VendorDashboard = () => {
         formData.append("image", selectedImage);
       }
 
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      };
-
-      // Update the product using the product-specific endpoint.
       await axios.put(
         `http://127.0.0.1:8000/api/vendor/products/${editProduct.id}/`,
         formData,
-        config
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
-      fetchData();
+      fetchProducts();
       setEditProduct(null);
       setSelectedImage(null);
     } catch (error) {
@@ -112,16 +106,15 @@ const VendorDashboard = () => {
     }
   };
 
-  // Function to delete a product given its id.
+  // Delete a product
   const handleDeleteProduct = async (productId) => {
     try {
       const token = localStorage.getItem("accessToken") || "";
-      const config = { headers: { Authorization: `Bearer ${token}` } };
       await axios.delete(
         `http://127.0.0.1:8000/api/vendor/products/${productId}/`,
-        config
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      // Remove the deleted product from state.
+
       setProducts(products.filter((product) => product.id !== productId));
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -129,101 +122,48 @@ const VendorDashboard = () => {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50" }}>
-      {/* Header */}
-      <Box
-        component="header"
-        sx={{ bgcolor: "background.paper", boxShadow: 1 }}
-      >
-        <Container maxWidth="lg">
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f9f9f9" }}>
+      {/* Navbar */}
+      <VendorNavbar />
+
+      {/* Main Content */}
+      <Container maxWidth="lg" sx={{ py: 6 }}>
+        {/* Products Section */}
+        <Box>
           <Box
             sx={{
-              py: 3,
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              mb: 4,
             }}
           >
-            <Typography variant="h4" color="primary.main" fontWeight="bold">
-              Vendor Dashboard
+            <Typography variant="h5" fontWeight="bold">
+              My Products
             </Typography>
-
-            <Box component="nav" sx={{ display: "flex", gap: 3 }}>
-              <Button
-                component={Link}
-                to="/vendor-dashboard"
-                sx={{ color: "text.secondary", fontWeight: 500 }}
-              >
-                Dashboard
-              </Button>
-              <Button
-                component={Link}
-                to="/vendor-profile"
-                sx={{ color: "primary.main", fontWeight: 500 }}
-              >
-                Profile
-              </Button>
-              <Button
-                variant="h7"
-                color="warming"
-                fontWeight="bold"
-                onClick={() => navigate("/vendor-orders")}
-              >
-                Orders
-              </Button>
-              <Button
-                component={Link}
-                onClick={() => {
-                  localStorage.clear(); // Clear user data
-                  navigate("/"); // Navigate to home
-                  window.location.href = "/"; // Full reload to update UI
-                }}
-                sx={{ color: "error.main", fontWeight: 500 }}
-              >
-                Logout
-              </Button>
-            </Box>
-          </Box>
-        </Container>
-      </Box>
-
-      <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Outlet />
-        {location.pathname === "/vendor-dashboard" && (
-          <Box sx={{ mt: 6 }}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 4,
-              }}
+            <Button
+              variant="contained"
+              component={Link}
+              to="/product-add"
+              sx={{ textTransform: "none" }}
             >
-              <Typography variant="h5" fontWeight="bold">
-                My Products
-              </Typography>
-              <Button
-                variant="contained"
-                component={Link}
-                to="/product-add"
-                sx={{ textTransform: "none" }}
-              >
-                Add New Product
-              </Button>
-            </Box>
-            <Grid container spacing={4}>
-              {products.map((product) => (
-                <Grid item key={product.id} xs={12} sm={6} md={4}>
-                  <VendorProductCard
-                    product={product}
-                    onUpdate={() => setEditProduct(product)}
-                    onDelete={handleDeleteProduct}
-                  />
-                </Grid>
-              ))}
-            </Grid>
+              Add New Product
+            </Button>
           </Box>
-        )}
+
+          {/* Product Cards */}
+          <Grid container spacing={4}>
+            {products.map((product) => (
+              <Grid item key={product.id} xs={12} sm={6} md={4}>
+                <VendorProductCard
+                  product={product}
+                  onUpdate={() => setEditProduct(product)}
+                  onDelete={handleDeleteProduct}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
       </Container>
 
       {/* Edit Product Modal */}
@@ -283,7 +223,6 @@ const VendorDashboard = () => {
               type="file"
               accept="image/*"
               onChange={(e) => setSelectedImage(e.target.files[0])}
-              className="mt-2"
             />
             <Button
               variant="contained"

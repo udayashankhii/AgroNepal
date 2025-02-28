@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import VendorNavbar from "./vendorNavbar";
 
 const VendorProfile = () => {
   const [vendor, setVendor] = useState(null);
@@ -14,8 +15,9 @@ const VendorProfile = () => {
     pan_number_image: null,
   });
   const navigate = useNavigate();
-  const token = localStorage.getItem('accessToken') // Replace with actual token management
+  const token = localStorage.getItem("accessToken");
 
+  // Fetch vendor profile
   useEffect(() => {
     axios
       .get("http://127.0.0.1:8000/api/vendor/profile/", {
@@ -23,9 +25,19 @@ const VendorProfile = () => {
       })
       .then((response) => {
         setVendor(response.data);
+        setFormData({
+          shop_name: response.data.shop_name || "",
+          description: response.data.description || "",
+          phone_number: response.data.phone_number || "",
+          address: response.data.address || "",
+          pan_number_image: null,
+        });
       })
       .catch((err) => {
-        if (err.response && err.response.data.error === "Vendor profile not found") {
+        if (
+          err.response &&
+          err.response.data.error === "Vendor profile not found"
+        ) {
           setVendor(null);
         } else {
           setError("Error fetching vendor profile");
@@ -34,21 +46,25 @@ const VendorProfile = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  // Handle file input changes
   const handleFileChange = (e) => {
     setFormData({ ...formData, pan_number_image: e.target.files[0] });
   };
 
+  // Submit profile update
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       data.append(key, formData[key]);
     });
+
     try {
       await axios.post("http://127.0.0.1:8000/api/vendor/register/", data, {
         headers: {
@@ -56,9 +72,11 @@ const VendorProfile = () => {
           "Content-Type": "multipart/form-data",
         },
       });
+      alert("Profile submitted successfully!");
       navigate("/vendor-dashboard");
     } catch (error) {
-      console.error("Error submitting form", error);
+      console.error("Error submitting profile", error);
+      alert("Failed to submit profile.");
     }
   };
 
@@ -66,42 +84,93 @@ const VendorProfile = () => {
 
   if (error) return <p className="text-center text-red-600">{error}</p>;
 
-  if (vendor) {
-    if (!vendor.is_verified) {
-      return (
-        <div className="max-w-lg mx-auto p-6 bg-yellow-100 border border-yellow-400 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-yellow-700">Vendor Profile</h2>
-          <p><strong>Shop Name:</strong> {vendor.shop_name}</p>
-          <p><strong>Phone Number:</strong> {vendor.phone_number}</p>
-          <p><strong>Address:</strong> {vendor.address}</p>
-          <p><strong>Status:</strong> KYC Pending</p>
-        </div>
-      );
-    } else {
-      return (
-        <div className="max-w-lg mx-auto p-6 bg-green-100 border border-green-400 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-green-700">Vendor Profile</h2>
-          <p><strong>Shop Name:</strong> {vendor.shop_name}</p>
-          <p><strong>Phone Number:</strong> {vendor.phone_number}</p>
-          <p><strong>Address:</strong> {vendor.address}</p>
-          <p><strong>Status:</strong> KYC Verified</p>
-          <img src={`http://localhost:8000/${vendor.pan_number_image}`} alt="PAN" className="mt-4 w-full h-40 object-cover rounded-lg" />
-        </div>
-      );
-    }
-  }
-
   return (
-    <div className="max-w-lg mx-auto p-6 bg-green-50 border border-green-400 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold text-green-700 mb-4">Vendor Profile Submission</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input type="text" name="shop_name" placeholder="Shop Name" value={formData.shop_name} onChange={handleChange} required className="w-full p-2 border border-green-300 rounded-md" />
-        <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} required className="w-full p-2 border border-green-300 rounded-md"></textarea>
-        <input type="text" name="phone_number" placeholder="Phone Number" value={formData.phone_number} onChange={handleChange} required className="w-full p-2 border border-green-300 rounded-md" />
-        <input type="text" name="address" placeholder="Address" value={formData.address} onChange={handleChange} required className="w-full p-2 border border-green-300 rounded-md" />
-        <input type="file" name="pan_number_image" onChange={handleFileChange} required className="w-full p-2 border border-green-300 rounded-md" />
-        <button type="submit" className="w-full bg-green-600 text-white py-2 rounded-md">Submit</button>
-      </form>
+    <div className="min-h-screen bg-gray-50">
+      <VendorNavbar />
+      <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">
+          Vendor Profile
+        </h2>
+        {vendor ? (
+          <div>
+            <p>
+              <strong>Shop Name:</strong> {vendor.shop_name}
+            </p>
+            <p>
+              <strong>Phone Number:</strong> {vendor.phone_number}
+            </p>
+            <p>
+              <strong>Address:</strong> {vendor.address}
+            </p>
+            <p>
+              <strong>Status:</strong>{" "}
+              {vendor.is_verified ? (
+                <span className="text-green-600">KYC Verified</span>
+              ) : (
+                <span className="text-yellow-600">KYC Pending</span>
+              )}
+            </p>
+            {vendor.pan_number_image && (
+              <img
+                src={`http://localhost:8000/${vendor.pan_number_image}`}
+                alt="PAN"
+                className="mt-4 w-full h-auto object-cover rounded-lg"
+              />
+            )}
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              name="shop_name"
+              placeholder="Shop Name"
+              value={formData.shop_name}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+            <textarea
+              name="description"
+              placeholder="Description"
+              value={formData.description}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded-md"
+            ></textarea>
+            <input
+              type="text"
+              name="phone_number"
+              placeholder="Phone Number"
+              value={formData.phone_number}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+            <input
+              type="text"
+              name="address"
+              placeholder="Address"
+              value={formData.address}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+            <input
+              type="file"
+              name="pan_number_image"
+              onChange={handleFileChange}
+              required={!vendor?.pan_number_image}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            />
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
+            >
+              Submit Profile
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 };

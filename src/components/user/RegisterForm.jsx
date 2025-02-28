@@ -60,13 +60,13 @@ const Register = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Since tokens are now issued after OTP verification,
-        // inform the user and redirect to OTP verification page.
         toast.success("Registration successful! Please verify OTP.", {
           position: "top-right",
           autoClose: 2000,
           theme: "colored",
-          onClose: () => navigate("/verify-otp"),
+          onClose: () => {
+            navigate("/verify-otp", { state: { email: formData.email } });
+          },
         });
       } else {
         const errorMessage =
@@ -89,12 +89,6 @@ const Register = () => {
       setIsSubmitting(false);
     }
   };
-
-  // Handler for "Continue with Google" remains unchanged.
-  // const handleGoogleRegister = () => {
-  //   window.location.href =
-  //     "http://127.0.0.1:8000/api/accounts/google-register/";
-  // };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -225,29 +219,7 @@ const Register = () => {
             {isSubmitting ? "Registering..." : "Register"}
           </button>
         </form>
-        {/* Google Registration
-        <div className="mt-6">
-          <div className="flex items-center justify-center mb-4">
-            <span className="border-b w-1/5 lg:w-1/4"></span>
-            <span className="text-xs text-center text-gray-500 uppercase mx-2">
-              or
-            </span>
-            <span className="border-b w-1/5 lg:w-1/4"></span>
-          </div>
-          <button
-            type="button"
-            onClick={handleGoogleRegister}
-            className="w-full flex justify-center items-center border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition duration-300 hover:bg-gray-100"
-          >
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
-              alt="Google logo"
-              className="w-5 h-5 mr-2"
-            />
-            Continue with Google
-          </button>
-        </div> */}
-        {/* Link to Login Page */}
+
         <div className="text-center mt-4">
           <a href="/login" className="text-green-500 hover:text-green-900">
             Already have an account? Login

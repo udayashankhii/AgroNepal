@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
-const GOOGLE_CLIENT_ID =
-  "302616355850-0knckl0gobuncismjobvjldf692ghre6.apps.googleusercontent.com"; // Replace with your Google Client ID
+// const GOOGLE_CLIENT_ID =
+//   "302616355850-0knckl0gobuncismjobvjldf692ghre6.apps.googleusercontent.com"; // Replace with your Google Client ID
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -51,37 +51,37 @@ const Login = () => {
     setLoading(false);
   };
 
-  const handleGoogleSuccess = async (response) => {
-    try {
-      const googleToken = response.credential;
-      const googleResponse = await fetch(
-        "http://127.0.0.1:8000/api/accounts/google-login/",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: googleToken }),
-        }
-      );
+  // const handleGoogleSuccess = async (response) => {
+  //   try {
+  //     const googleToken = response.credential;
+  //     const googleResponse = await fetch(
+  //       "http://127.0.0.1:8000/api/accounts/google-login/",
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({ token: googleToken }),
+  //       }
+  //     );
 
-      const data = await googleResponse.json();
+  //     const data = await googleResponse.json();
 
-      if (googleResponse.ok) {
-        localStorage.setItem("accessToken", data.access);
-        localStorage.setItem("refreshToken", data.refresh);
-        localStorage.setItem("role", data.role);
+  //     if (googleResponse.ok) {
+  //       localStorage.setItem("accessToken", data.access);
+  //       localStorage.setItem("refreshToken", data.refresh);
+  //       localStorage.setItem("role", data.role);
 
-        toast.success("Google login successful!");
-        setTimeout(() => {
-          navigate("/");
-          window.location.reload();
-        }, 1500);
-      } else {
-        toast.error("Google login failed.");
-      }
-    } catch (error) {
-      toast.error("Error connecting to server.");
-    }
-  };
+  //       toast.success("Google login successful!");
+  //       setTimeout(() => {
+  //         navigate("/");
+  //         window.location.reload();
+  //       }, 1500);
+  //     } else {
+  //       toast.error("Google login failed.");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error connecting to server.");
+  //   }
+  // };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -117,17 +117,17 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="mt-4 text-center">
+        {/* <div className="mt-4 text-center">
           <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => toast.error("Google login failed.")}
             />
           </GoogleOAuthProvider>
-        </div>
+        </div> */}
 
         <p className="text-center mt-4 text-sm">
-          Don't have an account?{" "}
+          Dont have an account?{" "}
           <a href="/register" className="text-blue-600 hover:underline">
             Register
           </a>
