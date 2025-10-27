@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 // import Layout from "./vendorLayout";
-import VendorNavbar from "./vendorNavbar";
+import VendorNavbar from "./VendorNavbar";
 const OrdersTable = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
