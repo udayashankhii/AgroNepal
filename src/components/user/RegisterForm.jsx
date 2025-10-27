@@ -39,17 +39,27 @@ const Register = () => {
     setIsSubmitting(true);
 
     try {
-      // Updated API endpoint port
-const response = await fetch(`${import.meta.env.VITE_API_URL}/api/accounts/register/`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(formData)
-});
-const data = await response.json();
-if (!response.ok) {
-  console.error("Registration error:", data); // <-- shows backend validation messages
-  throw new Error(data.detail || "Failed to register");
+  const response = await fetch(
+    `${import.meta.env.VITE_API_URL}/api/accounts/register/`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error("Registration failed:", data); // <-- shows field-specific errors
+    throw new Error(JSON.stringify(data));
+  }
+
+  console.log("Registration success:", data);
+} catch (err) {
+  console.error("Registration error:", err);
 }
+
 
 
       // const data = await response.json();
@@ -64,26 +74,26 @@ if (!response.ok) {
       //     },
       //   });
       // } 
-      else {
-        const errorMessage =
-          data.detail ||
-          Object.entries(data)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join("\n");
-        toast.error(errorMessage, {
-          position: "top-right",
-          theme: "colored",
-        });
-      }
-    } catch (err) {
-      toast.error("Network error. Please try again.", {
-        position: "top-right",
-        theme: "colored",
-      });
-      console.error("Registration error:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
+    //   else {
+    //     const errorMessage =
+    //       data.detail ||
+    //       Object.entries(data)
+    //         .map(([key, value]) => `${key}: ${value}`)
+    //         .join("\n");
+    //     toast.error(errorMessage, {
+    //       position: "top-right",
+    //       theme: "colored",
+    //     });
+    //   }
+    // } catch (err) {
+    //   toast.error("Network error. Please try again.", {
+    //     position: "top-right",
+    //     theme: "colored",
+    //   });
+    //   console.error("Registration error:", err);
+    // } finally {
+    //   setIsSubmitting(false);
+    // }
   };
 
   return (
