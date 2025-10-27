@@ -11,7 +11,7 @@ import {
   TextField,
   Stack,
 } from "@mui/material";
-import VendorNavbar from "./VendorNavbar"; // Navbar Component
+import VendorNavbar from "./temp.jsx"; // Navbar Component
 import VendorProductCard from "./VendorProductCard"; // Product Card Component
 
 const VendorDashboard = () => {
