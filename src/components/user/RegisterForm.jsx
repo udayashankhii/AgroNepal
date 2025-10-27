@@ -40,34 +40,31 @@ const Register = () => {
 
     try {
       // Updated API endpoint port
-const response = await fetch(
-  `${import.meta.env.VITE_API_URL}/api/accounts/register/`,
-  {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      username: formData.username,
-      email: formData.email,
-      phone_number: formData.phone_number,
-      password: formData.password,
-      confirm_password: formData.confirm_password,
-      role: formData.role,
-    }),
-  }
-);
+const response = await fetch(`${import.meta.env.VITE_API_URL}/api/accounts/register/`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(formData)
+});
+const data = await response.json();
+if (!response.ok) {
+  console.error("Registration error:", data); // <-- shows backend validation messages
+  throw new Error(data.detail || "Failed to register");
+}
 
-      const data = await response.json();
 
-      if (response.ok) {
-        toast.success("Registration successful! Please verify OTP.", {
-          position: "top-right",
-          autoClose: 2000,
-          theme: "colored",
-          onClose: () => {
-            navigate("/verify-otp", { state: { email: formData.email } });
-          },
-        });
-      } else {
+      // const data = await response.json();
+
+      // if (response.ok) {
+      //   toast.success("Registration successful! Please verify OTP.", {
+      //     position: "top-right",
+      //     autoClose: 2000,
+      //     theme: "colored",
+      //     onClose: () => {
+      //       navigate("/verify-otp", { state: { email: formData.email } });
+      //     },
+      //   });
+      // } 
+      else {
         const errorMessage =
           data.detail ||
           Object.entries(data)
