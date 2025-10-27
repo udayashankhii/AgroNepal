@@ -110,13 +110,13 @@ const VendorProfile = () => {
                 <span className="text-yellow-600">KYC Pending</span>
               )}
             </p>
-            {vendor.pan_number_image && (
-              <img
-                src={`http://localhost:8000/${vendor.pan_number_image}`}
-                alt="PAN"
-                className="mt-4 w-full h-auto object-cover rounded-lg"
-              />
-            )}
+           {vendor.pan_number_image && (
+  <img
+    src={`${import.meta.env.VITE_API_URL}/${vendor.pan_number_image}`}
+    alt="PAN"
+    className="mt-4 w-full h-auto object-cover rounded-lg"
+  />
+)}
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">

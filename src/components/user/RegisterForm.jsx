@@ -40,22 +40,21 @@ const Register = () => {
 
     try {
       // Updated API endpoint port
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/accounts/register/",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          // Send phone_number rather than phone
-          body: JSON.stringify({
-            username: formData.username,
-            email: formData.email,
-            phone_number: formData.phone_number,
-            password: formData.password,
-            confirm_password: formData.confirm_password,
-            role: formData.role,
-          }),
-        }
-      );
+const response = await fetch(
+  `${import.meta.env.VITE_API_URL}/api/accounts/register/`,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: formData.username,
+      email: formData.email,
+      phone_number: formData.phone_number,
+      password: formData.password,
+      confirm_password: formData.confirm_password,
+      role: formData.role,
+    }),
+  }
+);
 
       const data = await response.json();
 

@@ -49,15 +49,11 @@ try {
   if (formData.pan_number_image) {
     payload.append("pan_number_image", formData.pan_number_image);
   }
-
-  const response = await fetch("http://127.0.0.1:8000/api/vendor/kyc/", {
-    method: "POST",
-    // When using FormData, do NOT set Content-Type manually.
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: payload,
-  });
+const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/kyc/`, {
+  method: "POST",
+  headers: { Authorization: `Bearer ${token}` },
+  body: payload, // FormData
+});
 
   const data = await response.json();
   if (response.ok) {

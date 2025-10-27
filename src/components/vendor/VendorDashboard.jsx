@@ -109,11 +109,11 @@ const VendorDashboard = () => {
   // Delete a product
   const handleDeleteProduct = async (productId) => {
     try {
-      const token = localStorage.getItem("accessToken") || "";
-      await axios.delete(
-        `http://127.0.0.1:8000/api/vendor/products/${productId}/`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const token = localStorage.getItem("accessToken") || "";
+await axios.delete(
+  `${import.meta.env.VITE_API_URL}/api/vendor/products/${productId}/`,
+  { headers: { Authorization: `Bearer ${token}` } }
+);
 
       setProducts(products.filter((product) => product.id !== productId));
     } catch (error) {
