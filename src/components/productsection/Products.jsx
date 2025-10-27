@@ -16,9 +16,11 @@ function Products() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          "http://127.0.0.1:8000/api/vendor/products/public/"
-        );
+ const response = await fetch(
+  `${import.meta.env.VITE_API_URL}/api/vendor/products/public/`
+);
+
+
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
