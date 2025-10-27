@@ -16,14 +16,15 @@ const VendorProfile = () => {
   });
   const navigate = useNavigate();
   const token = localStorage.getItem("accessToken");
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // Fetch vendor profile
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/vendor/profile/", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/vendor/profile/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setVendor(response.data);
         setFormData({
           shop_name: response.data.shop_name || "",
@@ -32,19 +33,19 @@ const VendorProfile = () => {
           address: response.data.address || "",
           pan_number_image: null,
         });
-      })
-      .catch((err) => {
-        if (
-          err.response &&
-          err.response.data.error === "Vendor profile not found"
-        ) {
+      } catch (err) {
+        if (err.response && err.response.data.error === "Vendor profile not found") {
           setVendor(null);
         } else {
           setError("Error fetching vendor profile");
         }
-      })
-      .finally(() => setLoading(false));
-  }, []);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [API_URL, token]);
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -66,7 +67,7 @@ const VendorProfile = () => {
     });
 
     try {
-      await axios.post("http://127.0.0.1:8000/api/vendor/register/", data, {
+      await axios.post(`${API_URL}/api/vendor/register/`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -74,8 +75,8 @@ const VendorProfile = () => {
       });
       alert("Profile submitted successfully!");
       navigate("/vendor-dashboard");
-    } catch (error) {
-      console.error("Error submitting profile", error);
+    } catch (err) {
+      console.error("Error submitting profile", err.response?.data || err);
       alert("Failed to submit profile.");
     }
   };
@@ -88,20 +89,12 @@ const VendorProfile = () => {
     <div className="min-h-screen bg-gray-50">
       <VendorNavbar />
       <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">
-          Vendor Profile
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">Vendor Profile</h2>
         {vendor ? (
           <div>
-            <p>
-              <strong>Shop Name:</strong> {vendor.shop_name}
-            </p>
-            <p>
-              <strong>Phone Number:</strong> {vendor.phone_number}
-            </p>
-            <p>
-              <strong>Address:</strong> {vendor.address}
-            </p>
+            <p><strong>Shop Name:</strong> {vendor.shop_name}</p>
+            <p><strong>Phone Number:</strong> {vendor.phone_number}</p>
+            <p><strong>Address:</strong> {vendor.address}</p>
             <p>
               <strong>Status:</strong>{" "}
               {vendor.is_verified ? (
@@ -110,13 +103,13 @@ const VendorProfile = () => {
                 <span className="text-yellow-600">KYC Pending</span>
               )}
             </p>
-           {vendor.pan_number_image && (
-  <img
-    src={`${import.meta.env.VITE_API_URL}/${vendor.pan_number_image}`}
-    alt="PAN"
-    className="mt-4 w-full h-auto object-cover rounded-lg"
-  />
-)}
+            {vendor.pan_number_image && (
+              <img
+                src={`${API_URL}${vendor.pan_number_image}`}
+                alt="PAN"
+                className="mt-4 w-full h-auto object-cover rounded-lg"
+              />
+            )}
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
