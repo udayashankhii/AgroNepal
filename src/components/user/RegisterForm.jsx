@@ -3,9 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Main registration component with updated fields/flow
 const Register = () => {
-  // Update state key from phone to phone_number
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -23,7 +21,7 @@ const Register = () => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Updated form submission handler to reflect OTP verification flow
+  // Updated form submission handler to reflect OTP verification flow and improved error
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -39,37 +37,19 @@ const Register = () => {
     setIsSubmitting(true);
 
     try {
-  const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/api/accounts/register/`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    }
-  );
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/accounts/register/`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
-  const data = await response.json();
+      const data = await response.json();
 
-  if (!response.ok) {
-    console.error("Registration failed:", data); // <-- shows field-specific errors
-    throw new Error(JSON.stringify(data));
-  }
-
-
-
-
-
-       if (response.ok) {
-       toast.success("Registration successful! Please verify OTP.", {
-          position: "top-right",
-          autoClose: 2000,
-          theme: "colored",
-          onClose: () => {
-            navigate("/verify-otp", { state: { email: formData.email } });
-          },
-        });
-      } 
-      else {
+      if (!response.ok) {
+        // Show field-specific errors to user
         const errorMessage =
           data.detail ||
           Object.entries(data)
@@ -79,7 +59,17 @@ const Register = () => {
           position: "top-right",
           theme: "colored",
         });
+        return; // Prevent double error toast
       }
+
+      toast.success("Registration successful! Please verify OTP.", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "colored",
+        onClose: () => {
+          navigate("/verify-otp", { state: { email: formData.email } });
+        },
+      });
     } catch (err) {
       toast.error("Network error. Please try again.", {
         position: "top-right",
@@ -94,18 +84,11 @@ const Register = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
-          Register
-        </h2>
-
-        {/* Registration Form */}
+        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Register</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Username Field */}
           <div>
-            <label
-              htmlFor="username"
-              className="block text-gray-700 font-medium"
-            >
+            <label htmlFor="username" className="block text-gray-700 font-medium">
               Username
             </label>
             <input
@@ -118,7 +101,6 @@ const Register = () => {
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
-
           {/* Email Field */}
           <div>
             <label htmlFor="email" className="block text-gray-700 font-medium">
@@ -134,13 +116,9 @@ const Register = () => {
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
-
           {/* Phone Number Field */}
           <div>
-            <label
-              htmlFor="phone_number"
-              className="block text-gray-700 font-medium"
-            >
+            <label htmlFor="phone_number" className="block text-gray-700 font-medium">
               Phone Number
             </label>
             <input
@@ -153,7 +131,6 @@ const Register = () => {
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
-
           {/* Role Selector */}
           <div>
             <label htmlFor="role" className="block text-gray-700 font-medium">
@@ -170,13 +147,9 @@ const Register = () => {
               <option value="vendor">Vendor</option>
             </select>
           </div>
-
           {/* Password Field */}
           <div>
-            <label
-              htmlFor="password"
-              className="block text-gray-700 font-medium"
-            >
+            <label htmlFor="password" className="block text-gray-700 font-medium">
               Password
             </label>
             <input
@@ -187,15 +160,12 @@ const Register = () => {
               onChange={handleChange}
               required
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              autoComplete="new-password"
             />
           </div>
-
           {/* Confirm Password Field */}
           <div>
-            <label
-              htmlFor="confirm_password"
-              className="block text-gray-700 font-medium"
-            >
+            <label htmlFor="confirm_password" className="block text-gray-700 font-medium">
               Confirm Password
             </label>
             <input
@@ -206,21 +176,20 @@ const Register = () => {
               onChange={handleChange}
               required
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              autoComplete="new-password"
             />
           </div>
-
           {/* Register Button */}
           <button
             type="submit"
             disabled={isSubmitting}
             className={`w-full bg-green-600 hover:bg-green-900 text-white font-medium py-2 px-4 rounded-lg transition duration-300 ${
-              isSubmitting && "opacity-50 cursor-not-allowed"
+              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
             {isSubmitting ? "Registering..." : "Register"}
           </button>
         </form>
-
         <div className="text-center mt-4">
           <a href="/login" className="text-green-500 hover:text-green-900">
             Already have an account? Login
