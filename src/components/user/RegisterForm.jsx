@@ -55,45 +55,40 @@ const Register = () => {
     throw new Error(JSON.stringify(data));
   }
 
-  console.log("Registration success:", data);
-} catch (err) {
-  console.error("Registration error:", err);
-}
 
 
 
-      // const data = await response.json();
 
-      // if (response.ok) {
-      //   toast.success("Registration successful! Please verify OTP.", {
-      //     position: "top-right",
-      //     autoClose: 2000,
-      //     theme: "colored",
-      //     onClose: () => {
-      //       navigate("/verify-otp", { state: { email: formData.email } });
-      //     },
-      //   });
-      // } 
-    //   else {
-    //     const errorMessage =
-    //       data.detail ||
-    //       Object.entries(data)
-    //         .map(([key, value]) => `${key}: ${value}`)
-    //         .join("\n");
-    //     toast.error(errorMessage, {
-    //       position: "top-right",
-    //       theme: "colored",
-    //     });
-    //   }
-    // } catch (err) {
-    //   toast.error("Network error. Please try again.", {
-    //     position: "top-right",
-    //     theme: "colored",
-    //   });
-    //   console.error("Registration error:", err);
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
+       if (response.ok) {
+       toast.success("Registration successful! Please verify OTP.", {
+          position: "top-right",
+          autoClose: 2000,
+          theme: "colored",
+          onClose: () => {
+            navigate("/verify-otp", { state: { email: formData.email } });
+          },
+        });
+      } 
+      else {
+        const errorMessage =
+          data.detail ||
+          Object.entries(data)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join("\n");
+        toast.error(errorMessage, {
+          position: "top-right",
+          theme: "colored",
+        });
+      }
+    } catch (err) {
+      toast.error("Network error. Please try again.", {
+        position: "top-right",
+        theme: "colored",
+      });
+      console.error("Registration error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
